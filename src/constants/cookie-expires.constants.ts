@@ -1,0 +1,4 @@
+export const COOKIE_EXPIRES = {
+  REFRESH_TOKEN: 60 * 60 * 3,
+  ACCESS_TOKEN: 60 * 30,
+}
