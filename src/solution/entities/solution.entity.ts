@@ -1,26 +1,44 @@
-import { Column, Entity, JoinColumn, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { Company } from '../../company/entities';
-import { Order } from '../../order/entities';
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToMany, ManyToOne, UpdateDateColumn } from 'typeorm';
+import { Company } from '../../company/entities/company.entity';
+import { Order } from '../../order/entities/order.entity';
+import { AbstractEntity } from '../../common/entity/abstract.entity';
 
 @Entity()
-export class Solution {
-  @PrimaryGeneratedColumn()
-  id: number;
-
-  @Column()
+export class Solution extends AbstractEntity<Solution>{
+  @Column({
+    nullable: false
+  })
   name: string;
 
-  @Column()
+  @Column({
+    nullable: false
+  })
   price: number;
 
-  @Column()
+  @Column({
+    nullable: false
+  })
   costPrice: number;
 
-  @Column()
+  @Column({
+    nullable: false
+  })
   difficulty: number;
 
-  @Column()
+  @Column({
+    nullable: true
+  })
   comment: string;
+
+  @CreateDateColumn({
+    type: 'timestamp with time zone'
+  })
+  createdAt: Date;
+
+  @UpdateDateColumn({
+    type: 'timestamp with time zone'
+  })
+  updatedAt: Date;
 
   @ManyToOne(() => Company, company => company.solutions)
   @JoinColumn({ name: 'companyId' })

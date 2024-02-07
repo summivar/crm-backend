@@ -5,6 +5,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { CommonModule } from './common/common.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { IndividualClientModule } from './client/individual-client/individual-client.module';
+import { CorporateClientModule } from './client/corporate-client/corporate-client.module';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
+import { CompanyModule } from './company/company.module';
 
 @Module({
   imports: [
@@ -22,9 +27,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
         password: configService.get('database.PASSWORD'),
         database: configService.get('database.NAME'),
         synchronize: true,
+        autoLoadEntities: true,
         entities: [
           __dirname + '/**/*.entity{.js, .ts}'
-        ]
+        ],
       }),
       inject: [ConfigService]
     }),
@@ -34,6 +40,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       serveRoot: '/uploads',
     }),
     CommonModule,
+    IndividualClientModule,
+    CorporateClientModule,
+    AuthModule,
+    UserModule,
+    CompanyModule,
   ],
 })
 export class AppModule {

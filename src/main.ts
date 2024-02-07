@@ -1,4 +1,4 @@
-import { NestFactory } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -7,6 +7,7 @@ import { ValidationPipe } from './pipes';
 import { TransformInterceptor } from './interceptors';
 import * as basicAuth from 'express-basic-auth';
 import * as cookieParser from 'cookie-parser';
+import { QueryErrorFilter } from './filters/typeormException.filter';
 
 async function start() {
   const app = await NestFactory.create(AppModule);
@@ -40,7 +41,7 @@ async function start() {
   };
 
   const authMiddleware = basicAuth({
-    users: { 'admin': 'admin' },
+    users: {'admin': 'admin'},
     challenge: true,
   });
 
@@ -52,6 +53,8 @@ async function start() {
 
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(new TransformInterceptor());
+  const {httpAdapter} = app.get(HttpAdapterHost);
+  app.useGlobalFilters(new QueryErrorFilter(httpAdapter));
   app.use(cookieParser(configService.get<string>('COOKIE_SECRET')));
   app.enableCors({
     credentials: true,

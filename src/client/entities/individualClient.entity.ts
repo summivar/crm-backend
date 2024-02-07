@@ -1,22 +1,30 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-import { Infotracer } from '../../infotracer/entities';
+import { InfoTracer } from '../../infoTracer/entities/infoTracer.entity';
 import { Client } from './client.entity';
 
 @Entity()
 export class IndividualClient extends Client {
-  @Column()
+  @Column({
+    nullable: false,
+  })
   name: string;
 
-  @Column()
+  @Column({
+    nullable: false,
+  })
   surname: string;
 
-  @Column()
-  middlename: string;
+  @Column({
+    nullable: false,
+  })
+  middleName: string;
 
-  @Column()
+  @Column({
+    nullable: false,
+  })
   birthday: Date;
 
-  @ManyToOne(() => Infotracer, infotracer => infotracer.individualClients)
-  @JoinColumn({name: 'infotracerId'})
-  infotracer: Infotracer;
+  @ManyToOne(() => InfoTracer, infoTracer => infoTracer.individualClients)
+  @JoinColumn({name: 'infoTracerId'})
+  infoTracer: InfoTracer;
 }
