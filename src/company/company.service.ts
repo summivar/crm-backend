@@ -10,10 +10,10 @@ export class CompanyService {
   ) {
   }
 
-  async getCompanyBySignupId(signupString: string) {
+  async getCompanyById(id: number) {
     return this.companyRepository.findOne({
       where: {
-        signupString: signupString,
+        id: id,
       },
       relations: {
         users: true,

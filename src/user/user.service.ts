@@ -16,6 +16,10 @@ export class UserService {
   ) {
   }
 
+  async save(user: Partial<User>) {
+    return this.userRepository.save(user);
+  }
+
   async getUserByPhone(phone: string) {
     return this.userRepository.findOneBy({
       phone: phone,

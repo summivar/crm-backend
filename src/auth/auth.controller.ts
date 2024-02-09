@@ -6,18 +6,13 @@ import {
   Post,
   Req,
   Res,
-  UploadedFile,
   UseGuards,
-  UseInterceptors
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { SignInDto, SignUpStuffDto, SignUpSuperManagerDto } from './dtos';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { COOKIE_EXPIRES, COOKIE_KEY, FILE_LIMIT } from '../constants';
-import { ValidationException } from '../exceptions';
-import { extname } from 'path';
-import { UserRequest } from './types';
+import { COOKIE_EXPIRES, COOKIE_KEY } from '../constants';
+import { SignUpResponse, UserRequest } from './types';
 import { Request, Response } from 'express';
 import { JwtGuard } from './guards';
 import { Role, Worker } from './enums';
@@ -32,18 +27,21 @@ export class AuthController {
   @Post('signup')
   async signup(
     @Body() signupDto: SignUpSuperManagerDto,
-    @Res({passthrough: true}) response: Response
-  ) {
-    const tokens = await this.authService.signupWithCompany(signupDto);
+    @Res({passthrough: true}) res: Response
+  ): Promise<SignUpResponse> {
+    const response = await this.authService.signupWithCompany(signupDto);
 
     const expirationTime = new Date();
     expirationTime.setSeconds(expirationTime.getSeconds() + COOKIE_EXPIRES.REFRESH_TOKEN);
-    response.cookie(COOKIE_KEY.REFRESH_TOKEN, tokens.refreshToken, {
+    res.cookie(COOKIE_KEY.REFRESH_TOKEN, response.tokens.refreshToken, {
       httpOnly: true,
       expires: expirationTime,
     });
 
-    return tokens.accessToken;
+    return {
+      accessToken: response.tokens.accessToken,
+      user: response.user
+    }
   }
 
   @ApiOperation({summary: 'Регистрация работника компании'})
@@ -64,18 +62,21 @@ export class AuthController {
     @Body() signupDto: SignUpStuffDto,
     @Param('companySignupString') signupString: string,
     @Param('role', new ParseEnumPipe(Worker)) role: Role,
-    @Res({passthrough: true}) response: Response
-  ) {
-    const tokens = await this.authService.signupStuff(signupDto, signupString, role);
+    @Res({passthrough: true}) res: Response
+  ): Promise<SignUpResponse> {
+    const response = await this.authService.signupStuff(signupDto, signupString, role);
 
     const expirationTime = new Date();
     expirationTime.setSeconds(expirationTime.getSeconds() + COOKIE_EXPIRES.REFRESH_TOKEN);
-    response.cookie(COOKIE_KEY.REFRESH_TOKEN, tokens.refreshToken, {
+    res.cookie(COOKIE_KEY.REFRESH_TOKEN, response.tokens.refreshToken, {
       httpOnly: true,
       expires: expirationTime,
     });
 
-    return tokens.accessToken;
+    return {
+      accessToken: response.tokens.accessToken,
+      user: response.user
+    }
   }
 
   @ApiOperation({summary: 'Авторизация пользователя'})

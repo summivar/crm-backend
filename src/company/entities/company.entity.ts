@@ -13,14 +13,25 @@ import { User } from '../../user/entities/user.entity';
 import { Solution } from '../../solution/entities/solution.entity';
 import { Order } from '../../order/entities/order.entity';
 import { AbstractEntity } from '../../common/entity/abstract.entity';
-import { v4 as uuid } from 'uuid';
+import { CryptService } from 'src/common/crypt/crypt.service';
+import { Role } from 'src/auth/enums';
 
 @Entity()
 export class Company extends AbstractEntity<Company> {
   @Column({
     nullable: false
   })
-  signupString: string;
+  signUpManagerString: string;
+
+  @Column({
+    nullable: false
+  })
+  signUpCleanerString: string;
+
+  @Column({
+    nullable: false
+  })
+  signUpDriverString: string;
 
   @OneToMany(() => InfoTracer, infoTracer => infoTracer.company, {cascade: true})
   infoTracers: InfoTracer[];
@@ -52,6 +63,8 @@ export class Company extends AbstractEntity<Company> {
 
   @BeforeInsert()
   async generateSignupString() {
-    this.signupString = uuid();
+    this.signUpManagerString = CryptService.encrypt(this.id, Role.MANAGER);
+    this.signUpCleanerString = CryptService.encrypt(this.id, Role.CLEANER);
+    this.signUpDriverString = CryptService.encrypt(this.id, Role.DRIVER);
   }
 }

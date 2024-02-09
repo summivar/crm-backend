@@ -3,8 +3,7 @@ import { SignInDto, SignUpStuffDto, SignUpSuperManagerDto } from './dtos';
 import { User } from '../user/entities/user.entity';
 import { EntityManager } from 'typeorm';
 import { Company } from '../company/entities/company.entity';
-import { FileSystemService } from '../common/file-system/file-system.service';
-import { Role, Worker } from './enums';
+import { Role } from './enums';
 import { UserService } from '../user/user.service';
 import { COOKIE_EXPIRES, EXCEPTION_MESSAGE, FILENAME } from '../constants';
 import * as bcrypt from 'bcrypt';
@@ -12,6 +11,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Tokens } from './types';
 import { CompanyService } from '../company/company.service';
+import { CryptService } from 'src/common/crypt/crypt.service';
 
 @Injectable()
 export class AuthService {
@@ -20,7 +20,6 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly entityManager: EntityManager,
-    private readonly fileService: FileSystemService,
     private readonly companyService: CompanyService,
   ) {
   }
@@ -35,20 +34,29 @@ export class AuthService {
 
     const user = new User({
       name: dto.name,
-      photoPath: FILENAME.DEFAULT_IMG,
+      photoPath: null,
       phone: dto.phone,
       password: dto.password,
       refreshToken: tokens.refreshToken,
-      role: Role.SUPERMANAGER
+      role: Role.ADMIN
     });
 
+    const newUser = await this.userService.save(user);
+
     const company = new Company({
-      users: [user]
+      users: [newUser]
     });
 
     await this.entityManager.save(company);
 
-    return tokens;
+    return {
+      tokens,
+      user: {
+        id: newUser.id,
+        name: newUser.name,
+        role: newUser.role
+      }
+    }
   }
 
   async signupStuff(dto: SignUpStuffDto, signupString: string, role: Role) {
@@ -57,7 +65,10 @@ export class AuthService {
       throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.ALREADY_EXISTS);
     }
 
-    const company = await this.companyService.getCompanyBySignupId(signupString);
+    const data = CryptService.decrypt(signupString);
+    const roleEnum: Role = Role[data.role as keyof typeof Role];
+
+    const company = await this.companyService.getCompanyById(data.id);
     if (!company) {
       throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND);
     }
@@ -66,19 +77,28 @@ export class AuthService {
 
     const user = new User({
       name: dto.name,
-      photoPath: FILENAME.DEFAULT_IMG,
+      photoPath: null,
       phone: dto.phone,
       password: dto.password,
       refreshToken: tokens.refreshToken,
-      role: role,
+      role: roleEnum,
       company: company
     });
 
-    company.users.push(user);
+    const newUser = await this.userService.save(user); 
+
+    company.users.push(newUser);
 
     await this.entityManager.save(company);
 
-    return tokens;
+    return {
+      tokens,
+      user: {
+        id: newUser.id,
+        name: newUser.name,
+        role: newUser.role
+      }
+    }
   }
 
   async signin(dto: SignInDto) {
@@ -100,7 +120,8 @@ export class AuthService {
   }
 
   async logout(phone: string) {
-    return this.userService.updateRefreshToken(phone, 'null');
+    await this.userService.updateRefreshToken(phone, 'null');
+    return this.companyService.getCompanyById(1);
   }
 
   async refreshTokens(refreshToken: string) {
