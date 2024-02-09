@@ -1,4 +1,4 @@
-import { Body, Controller, Param, ParseIntPipe, Put, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Param, ParseIntPipe, Put, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ApiConsumes, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -13,7 +13,13 @@ export class UserController {
   constructor(private userService: UserService) {
   }
 
-  @ApiOperation({summary: 'Изменение пользователя'})
+  @ApiOperation({ summary: 'Удаление всех пользователей ( и компаний )' })
+  @Delete('deleteAll')
+  async deleteAll() {
+    return this.userService.deleteAll();
+  }
+
+  @ApiOperation({ summary: 'Изменение пользователя' })
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('photo', {
     limits: {
@@ -38,12 +44,12 @@ export class UserController {
   async edit(
     @Body() editDto: EditUserDto,
     @UploadedFile() photo: Express.Multer.File,
-    @Param('id', new ParseIntPipe()) id: number
+    @Param('id', new ParseIntPipe()) id: number,
   ) {
     return this.userService.edit(editDto, id, photo);
   }
 
-  @ApiOperation({summary: 'Изменение роли пользователя'})
+  @ApiOperation({ summary: 'Изменение роли пользователя' })
   @ApiParam({
     name: 'id',
     required: true,
@@ -53,7 +59,7 @@ export class UserController {
   @Put('edit/role/:id')
   async editRole(
     @Body() editDto: EditUserRoleDto,
-    @Param('id', new ParseIntPipe()) id: number
+    @Param('id', new ParseIntPipe()) id: number,
   ) {
     return this.userService.editRole(editDto, id);
   }

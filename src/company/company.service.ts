@@ -6,18 +6,22 @@ import { Repository } from 'typeorm';
 @Injectable()
 export class CompanyService {
   constructor(
-    @InjectRepository(Company) private companyRepository: Repository<Company>
+    @InjectRepository(Company) private companyRepository: Repository<Company>,
   ) {
   }
 
   async getCompanyBySignupId(signupString: string) {
     return this.companyRepository.findOne({
       where: {
-        signupString: signupString
+        signupString: signupString,
       },
       relations: {
-        users: true
-      }
+        users: true,
+      },
     });
+  }
+
+  async deleteAll() {
+    return this.companyRepository.delete({});
   }
 }

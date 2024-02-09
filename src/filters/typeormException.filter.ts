@@ -34,6 +34,6 @@ export class QueryErrorFilter extends BaseExceptionFilter<
       );
     }
 
-    super.catch(new BadRequestException('tutu'), host);
+    super.catch(new BadRequestException(exception.toString()), host);
   }
 }
