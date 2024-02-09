@@ -107,6 +107,17 @@ export class AuthController {
     return this.authService.logout(req.user.phone);
   }
 
+  @ApiOperation({summary: 'Проверка авторизации'})
+  @ApiBearerAuth('JWT-auth')
+  @UseGuards(JwtGuard)
+  @Post('getAuth')
+  async getAuth(
+    @Req() req: UserRequest,
+    @Res({passthrough: true}) response: Response
+  ) {
+    return true;
+  }
+
   @ApiOperation({summary: 'Обновление токенов'})
   @Post('refresh')
   async refreshTokens(
