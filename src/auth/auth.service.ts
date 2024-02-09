@@ -5,8 +5,8 @@ import { EntityManager } from 'typeorm';
 import { Company } from '../company/entities/company.entity';
 import { Role } from './enums';
 import { UserService } from '../user/user.service';
-import { COOKIE_EXPIRES, EXCEPTION_MESSAGE, FILENAME } from '../constants';
-import * as bcrypt from 'bcrypt';
+import { COOKIE_EXPIRES, EXCEPTION_MESSAGE } from '../constants';
+import * as argon from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Tokens } from './types';
@@ -47,7 +47,13 @@ export class AuthService {
       users: [newUser]
     });
 
-    await this.entityManager.save(company);
+    const newCompany = await this.companyService.save(company);
+
+    newCompany.signUpManagerString = CryptService.encrypt(newCompany.id, Role.MANAGER);
+    newCompany.signUpDriverString = CryptService.encrypt(newCompany.id, Role.DRIVER);
+    newCompany.signUpCleanerString = CryptService.encrypt(newCompany.id, Role.CLEANER);
+
+    await this.companyService.save(newCompany);
 
     return {
       tokens,
@@ -56,19 +62,24 @@ export class AuthService {
         name: newUser.name,
         role: newUser.role
       }
-    }
+    };
   }
 
-  async signupStuff(dto: SignUpStuffDto, signupString: string, role: Role) {
+  async signupStuff(dto: SignUpStuffDto, signupString: string) {
     const candidate = await this.userService.getUserByPhone(dto.phone);
     if (candidate) {
       throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.ALREADY_EXISTS);
     }
 
-    const data = CryptService.decrypt(signupString);
-    const roleEnum: Role = Role[data.role as keyof typeof Role];
+    let data = null;
+    try {
+      data = CryptService.decrypt(signupString);
+    } catch (e) {
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND);
+    }
+    const roleEnum: Role = Role[data?.role as keyof typeof Role];
 
-    const company = await this.companyService.getCompanyById(data.id);
+    const company = await this.companyService.getCompanyById(data?.id);
     if (!company) {
       throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND);
     }
@@ -85,7 +96,7 @@ export class AuthService {
       company: company
     });
 
-    const newUser = await this.userService.save(user); 
+    const newUser = await this.userService.save(user);
 
     company.users.push(newUser);
 
@@ -98,7 +109,7 @@ export class AuthService {
         name: newUser.name,
         role: newUser.role
       }
-    }
+    };
   }
 
   async signin(dto: SignInDto) {
@@ -107,8 +118,7 @@ export class AuthService {
       throw new UnauthorizedException(EXCEPTION_MESSAGE.UNAUTHORIZED_EXCEPTION.INVALID_CREDENTIALS);
     }
 
-    const passwordMatches = await bcrypt.compare(dto.password, candidate.password);
-
+    const passwordMatches = await argon.verify(candidate.password, dto.password);
     if (!passwordMatches) {
       throw new UnauthorizedException(EXCEPTION_MESSAGE.UNAUTHORIZED_EXCEPTION.INVALID_CREDENTIALS);
     }
@@ -116,7 +126,14 @@ export class AuthService {
     const tokens = await this.getToken(candidate.phone);
     await this.userService.updateRefreshToken(candidate.phone, tokens.refreshToken);
 
-    return tokens;
+    return {
+      tokens,
+      user: {
+        id: candidate.id,
+        name: candidate.name,
+        role: candidate.role
+      }
+    };
   }
 
   async logout(phone: string) {

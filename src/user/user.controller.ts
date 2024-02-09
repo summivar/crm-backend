@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Param, ParseIntPipe, Put, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Put, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ApiConsumes, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -11,6 +11,12 @@ import { EditUserDto, EditUserRoleDto } from './dtos';
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {
+  }
+
+  @ApiOperation({summary: 'Получить всех пользователей'})
+  @Get('get/all')
+  async getAll() {
+    return this.userService.getAllUsers();
   }
 
   @ApiOperation({ summary: 'Удаление всех пользователей ( и компаний )' })

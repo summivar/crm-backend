@@ -1,5 +1,4 @@
 import {
-  BeforeInsert,
   Column,
   CreateDateColumn,
   Entity,
@@ -13,23 +12,21 @@ import { User } from '../../user/entities/user.entity';
 import { Solution } from '../../solution/entities/solution.entity';
 import { Order } from '../../order/entities/order.entity';
 import { AbstractEntity } from '../../common/entity/abstract.entity';
-import { CryptService } from 'src/common/crypt/crypt.service';
-import { Role } from 'src/auth/enums';
 
 @Entity()
 export class Company extends AbstractEntity<Company> {
   @Column({
-    nullable: false
+    nullable: true
   })
   signUpManagerString: string;
 
   @Column({
-    nullable: false
+    nullable: true
   })
   signUpCleanerString: string;
 
   @Column({
-    nullable: false
+    nullable: true
   })
   signUpDriverString: string;
 
@@ -60,11 +57,4 @@ export class Company extends AbstractEntity<Company> {
     type: 'timestamp with time zone'
   })
   updatedAt: Date;
-
-  @BeforeInsert()
-  async generateSignupString() {
-    this.signUpManagerString = CryptService.encrypt(this.id, Role.MANAGER);
-    this.signUpCleanerString = CryptService.encrypt(this.id, Role.CLEANER);
-    this.signUpDriverString = CryptService.encrypt(this.id, Role.DRIVER);
-  }
 }

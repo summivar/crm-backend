@@ -10,7 +10,7 @@ import {
 import { Company } from '../../company/entities/company.entity';
 import { Role } from '../../auth/enums';
 import { Order } from '../../order/entities/order.entity';
-import { hash } from 'bcrypt';
+import * as argon from 'argon2';
 import { AbstractEntity } from '../../common/entity/abstract.entity';
 
 @Entity()
@@ -80,11 +80,10 @@ export class User extends AbstractEntity<User> {
   assignedOrders: Order[];
 
   @BeforeInsert()
-  @BeforeUpdate()
   async hashPassword() {
     if (!this.password) {
       return;
     }
-    this.password = await hash(this.password, 10);
+    this.password = await argon.hash(this.password);
   }
 }

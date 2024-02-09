@@ -11,17 +11,47 @@ export class CompanyService {
   }
 
   async getCompanyById(id: number) {
-    return this.companyRepository.findOne({
-      where: {
-        id: id,
-      },
-      relations: {
-        users: true,
-      },
-    });
+    return this.companyRepository
+      .createQueryBuilder('company')
+      .leftJoinAndSelect('company.users', 'users')
+      .select([
+        'company.id',
+        'company.signUpManagerString',
+        'company.signUpCleanerString',
+        'company.signUpDriverString',
+        'company.createdAt',
+        'company.updatedAt',
+        'users.id',
+        'users.name',
+        'users.role',
+      ])
+      .where('company.id = :id', {id})
+      .getOne();
   }
 
   async deleteAll() {
     return this.companyRepository.delete({});
+  }
+
+  async save(company: Partial<Company>) {
+    return this.companyRepository.save(company);
+  }
+
+  async getAllCompanies() {
+    return this.companyRepository
+      .createQueryBuilder('company')
+      .leftJoinAndSelect('company.users', 'users')
+      .select([
+        'company.id',
+        'company.signUpManagerString',
+        'company.signUpCleanerString',
+        'company.signUpDriverString',
+        'company.createdAt',
+        'company.updatedAt',
+        'users.id',
+        'users.name',
+        'users.role',
+      ])
+      .getManyAndCount();
   }
 }

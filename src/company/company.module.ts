@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { CompanyService } from './company.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Company } from './entities/company.entity';
+import { CompanyController } from './company.controller';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { Company } from './entities/company.entity';
   ],
   providers: [CompanyService],
   exports: [CompanyService],
+  controllers: [CompanyController],
 })
 export class CompanyModule {
 }

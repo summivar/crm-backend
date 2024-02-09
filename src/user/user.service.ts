@@ -41,7 +41,7 @@ export class UserService {
   }
 
   async edit(dto: EditUserDto, id: number, photo: Express.Multer.File) {
-    const user = await this.userRepository.findOneBy({ id: id });
+    const user = await this.userRepository.findOneBy({id: id});
     if (!user) {
       throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
     }
@@ -93,5 +93,14 @@ export class UserService {
     await this.deleteAllUsers();
     await this.companyService.deleteAll();
     return true;
+  }
+
+  async getAllUsers() {
+    return this.userRepository.find({
+      where: {},
+      relations: {
+        company: true
+      }
+    });
   }
 }

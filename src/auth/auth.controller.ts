@@ -41,7 +41,7 @@ export class AuthController {
     return {
       accessToken: response.tokens.accessToken,
       user: response.user
-    }
+    };
   }
 
   @ApiOperation({summary: 'Регистрация работника компании'})
@@ -51,20 +51,13 @@ export class AuthController {
     example: '78531390-d94f-4f8e-ae92-6aac9e181cd6',
     description: 'Ссылка подключения',
   })
-  @ApiParam({
-    name: 'role',
-    required: true,
-    example: Role.CLEANER,
-    description: 'Роль пользователя',
-  })
-  @Post('signup/:companySignupString/:role')
+  @Post('signup/:companySignupString')
   async signupStuff(
     @Body() signupDto: SignUpStuffDto,
     @Param('companySignupString') signupString: string,
-    @Param('role', new ParseEnumPipe(Worker)) role: Role,
     @Res({passthrough: true}) res: Response
   ): Promise<SignUpResponse> {
-    const response = await this.authService.signupStuff(signupDto, signupString, role);
+    const response = await this.authService.signupStuff(signupDto, signupString);
 
     const expirationTime = new Date();
     expirationTime.setSeconds(expirationTime.getSeconds() + COOKIE_EXPIRES.REFRESH_TOKEN);
@@ -76,24 +69,27 @@ export class AuthController {
     return {
       accessToken: response.tokens.accessToken,
       user: response.user
-    }
+    };
   }
 
   @ApiOperation({summary: 'Авторизация пользователя'})
   @Post('signin')
   async signin(
     @Body() signinDto: SignInDto,
-    @Res({passthrough: true}) response: Response
+    @Res({passthrough: true}) res: Response
   ) {
-    const tokens = await this.authService.signin(signinDto);
+    const response = await this.authService.signin(signinDto);
     const expirationTime = new Date();
     expirationTime.setSeconds(expirationTime.getSeconds() + COOKIE_EXPIRES.REFRESH_TOKEN);
-    response.cookie(COOKIE_KEY.REFRESH_TOKEN, tokens.refreshToken, {
+    res.cookie(COOKIE_KEY.REFRESH_TOKEN, response.tokens.refreshToken, {
       httpOnly: true,
       expires: expirationTime,
     });
 
-    return tokens.accessToken;
+    return {
+      accessToken: response.tokens.accessToken,
+      user: response.user
+    };
   }
 
   @ApiOperation({summary: 'Выход из аккаунта'})
