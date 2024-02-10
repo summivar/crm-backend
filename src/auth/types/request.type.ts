@@ -1,5 +1,10 @@
-import { Payload } from './payload.type';
+import { Role } from '../enums';
 
 export interface UserRequest extends Request {
-  user: Payload;
+  user: {
+    id: number;
+    phone: string;
+    role: Role;
+    company: number;
+  };
 }

@@ -1,11 +1,12 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import { EditUserDto, EditUserRoleDto } from './dtos';
+import { EditUserDto, RoleUserDto } from './dtos';
 import { EXCEPTION_MESSAGE, FILENAME } from '../constants';
 import { FileSystemService } from '../common/file-system/file-system.service';
 import { CompanyService } from '../company/company.service';
+import * as argon from 'argon2';
 
 @Injectable()
 export class UserService {
@@ -21,9 +22,19 @@ export class UserService {
   }
 
   async getUserByPhone(phone: string) {
-    return this.userRepository.findOneBy({
-      phone: phone,
-    });
+    return this.userRepository
+      .createQueryBuilder('user')
+      .leftJoin('user.company', 'company')
+      .select([
+        'user.id',
+        'user.name',
+        'user.phone',
+        'user.role',
+        'user.password',
+        'company.id',
+      ])
+      .where('user.phone = :phone', {phone})
+      .getOne();
   }
 
   async updateRefreshToken(phone: string, refreshToken: string) {
@@ -40,10 +51,14 @@ export class UserService {
     });
   }
 
-  async edit(dto: EditUserDto, id: number, photo: Express.Multer.File) {
-    const user = await this.userRepository.findOneBy({id: id});
+  async edit(dto: EditUserDto, userId: number, fromId: number, photo: Express.Multer.File) {
+    const user = await this.userRepository.findOneBy({id: userId});
     if (!user) {
       throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+    }
+
+    if (userId !== fromId) {
+      throw new ForbiddenException(EXCEPTION_MESSAGE.FORBIDDEN_EXCEPTION.NO_RULES_TO_GET);
     }
 
     if (dto.name) {
@@ -59,11 +74,15 @@ export class UserService {
     }
 
     if (dto.phone) {
+      const candidate = await this.getUserByPhone(dto.phone);
+      if (candidate) {
+        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.INVALID_DATA);
+      }
       user.phone = dto.phone;
     }
 
     if (dto.password) {
-      user.password = dto.password;
+      user.password = await argon.hash(dto.password);
     }
 
     if (photo?.buffer) {
@@ -74,15 +93,30 @@ export class UserService {
       user.photoPath = this.fileService.saveFile(photo);
     }
 
-    return this.userRepository.save(user);
+    const newUser = await this.userRepository.save(user);
+    const {password, refreshToken, ...userData} = newUser;
+    return userData;
   }
 
-  async editRole(editDto: EditUserRoleDto, id: number) {
-    return this.userRepository.update({
-      id: id,
-    }, {
-      role: editDto.role,
+  async editRole(editDto: RoleUserDto, id: number, company: number) {
+    const user = await this.userRepository.findOne({
+      where: {
+        id: id
+      },
+      relations: {
+        company: true
+      }
     });
+
+    if (user.company.id !== company) {
+      throw new ForbiddenException(EXCEPTION_MESSAGE.FORBIDDEN_EXCEPTION.NO_RULES_TO_GET);
+    }
+
+    user.role = editDto.role;
+    const savedUser = await this.userRepository.save(user);
+    const {password, refreshToken, ...userData} = savedUser;
+
+    return userData;
   }
 
   async deleteAllUsers() {

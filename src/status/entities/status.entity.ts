@@ -10,6 +10,11 @@ export class Status extends AbstractEntity<Status> {
   })
   name: string;
 
+  @Column({
+    nullable: false
+  })
+  color: string;
+
   @CreateDateColumn({
     type: 'timestamp with time zone'
   })

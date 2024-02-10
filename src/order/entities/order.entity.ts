@@ -61,8 +61,18 @@ export class Order extends AbstractEntity<Order> {
   })
   updatedAt: Date;
 
-  @ManyToMany(() => Solution)
-  @JoinTable({name: 'solutionsId'})
+  @ManyToMany(() => Solution, Solution => Solution.orders)
+  @JoinTable({
+    name: 'solutionsId',
+    joinColumn: {
+      name: 'order',
+      referencedColumnName: 'id'
+    },
+    inverseJoinColumn: {
+      name: 'solution',
+      referencedColumnName: 'id'
+    }
+  })
   solutions: Solution[];
 
   @ManyToMany(() => User)

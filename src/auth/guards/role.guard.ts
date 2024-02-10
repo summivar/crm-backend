@@ -41,15 +41,19 @@ export class RolesGuard implements CanActivate {
       }
 
       const payload: Payload = await this.jwtService.verifyAsync(token, {secret: this.configService.get<string>('accessSecret')});
-      const phone = payload.phone;
 
-      req.user = phone;
+      const user = await this.userService.getUserByPhone(payload.phone);
 
-      const user = await this.userService.getUserByPhone(phone);
-
-      if (user.role === Role.ADMIN) {
-        return true;
+      if (!user) {
+        throw new UnauthorizedException(EXCEPTION_MESSAGE.UNAUTHORIZED_EXCEPTION.USER_IS_NOT_AUTHORIZED);
       }
+
+      req.user = {
+        id: user.id,
+        phone: user.phone,
+        role: user.role,
+        company: user.company.id
+      };
 
       return requiredRoles.includes(user.role);
     } catch (e) {

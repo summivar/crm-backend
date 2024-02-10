@@ -30,22 +30,22 @@ export class Company extends AbstractEntity<Company> {
   })
   signUpDriverString: string;
 
-  @OneToMany(() => InfoTracer, infoTracer => infoTracer.company, {cascade: true})
+  @OneToMany(() => InfoTracer, infoTracer => infoTracer.company)
   infoTracers: InfoTracer[];
 
-  @OneToMany(() => Status, status => status.company, {cascade: true})
+  @OneToMany(() => Status, status => status.company)
   statuses: Status[];
 
-  @OneToMany(() => PaymentMethod, paymentMethod => paymentMethod.company, {cascade: true})
+  @OneToMany(() => PaymentMethod, paymentMethod => paymentMethod.company)
   paymentMethods: PaymentMethod[];
 
-  @OneToMany(() => User, user => user.company, {cascade: true})
+  @OneToMany(() => User, user => user.company)
   users: User[];
 
-  @OneToMany(() => Solution, solution => solution.company, {cascade: true})
+  @OneToMany(() => Solution, solution => solution.company)
   solutions: Solution[];
 
-  @OneToMany(() => Order, order => order.company, {cascade: true})
+  @OneToMany(() => Order, order => order.company)
   orders: Order[];
 
   @CreateDateColumn({

@@ -21,7 +21,7 @@ export class JwtGuard implements CanActivate {
         throw new UnauthorizedException(EXCEPTION_MESSAGE.UNAUTHORIZED_EXCEPTION.USER_IS_NOT_AUTHORIZED);
       }
 
-      const payload : Payload = await this.jwtService.verifyAsync(token, {
+      const payload: Payload = await this.jwtService.verifyAsync(token, {
         secret: this.configService.get<string>('accessSecret'),
       });
 
@@ -31,7 +31,12 @@ export class JwtGuard implements CanActivate {
         throw new UnauthorizedException(EXCEPTION_MESSAGE.UNAUTHORIZED_EXCEPTION.USER_IS_NOT_AUTHORIZED);
       }
 
-      req.user = payload.phone;
+      req.user = {
+        id: user.id,
+        phone: user.phone,
+        role: user.role,
+        company: user.company.id
+      };
 
       return true;
     } catch (e) {

@@ -10,6 +10,9 @@ import { CorporateClientModule } from './client/corporate-client/corporate-clien
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { CompanyModule } from './company/company.module';
+import { StatusModule } from './status/status.module';
+import { PaymentMethodModule } from './paymentMethod/paymentMethod.module';
+import { SolutionModule } from './solution/solution.module';
 
 @Module({
   imports: [
@@ -45,6 +48,9 @@ import { CompanyModule } from './company/company.module';
     AuthModule,
     UserModule,
     CompanyModule,
+    StatusModule,
+    PaymentMethodModule,
+    SolutionModule
   ],
 })
 export class AppModule {

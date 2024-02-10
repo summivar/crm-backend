@@ -12,6 +12,7 @@ import { Role } from '../../auth/enums';
 import { Order } from '../../order/entities/order.entity';
 import * as argon from 'argon2';
 import { AbstractEntity } from '../../common/entity/abstract.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class User extends AbstractEntity<User> {
@@ -50,12 +51,14 @@ export class User extends AbstractEntity<User> {
   role: Role;
 
   @Column({
-    nullable: false
+    nullable: false,
+    select: false,
   })
   password: string;
 
   @Column({
-    nullable: false
+    nullable: false,
+    select: false,
   })
   refreshToken: string;
 

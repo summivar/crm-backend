@@ -112,7 +112,14 @@ export class AuthController {
     @Req() req: UserRequest,
     @Res({passthrough: true}) response: Response
   ) {
-    return true;
+    console.log('user phone:', req.user.phone);
+    console.log('user role:', req.user.role);
+    console.log('user company:', req.user.company);
+    return {
+      phone: req.user.phone,
+      role: req.user.role,
+      company: req.user.company,
+    }
   }
 
   @ApiOperation({summary: 'Обновление токенов'})
