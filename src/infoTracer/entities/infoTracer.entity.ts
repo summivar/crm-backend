@@ -1,8 +1,8 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { Company } from '../../company/entities/company.entity';
-import { IndividualClient } from '../../client/entities/individualClient.entity';
-import { CorporateClient } from '../../client/entities/corporateClient.entity';
 import { AbstractEntity } from '../../common/entity/abstract.entity';
+import { IndividualClient } from '../../client/individual-client/entity/individualClient.entity';
+import { CorporateClient } from '../../client/corporate-client/entity/corporateClient.entity';
 
 @Entity()
 export class InfoTracer extends AbstractEntity<InfoTracer> {

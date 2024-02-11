@@ -11,7 +11,7 @@ import {
 import { Status } from '../../status/entities/status.entity';
 import { Client as ClientEnum } from '../../client/enums';
 import { User } from '../../user/entities/user.entity';
-import { Client } from '../../client/entities/client.entity';
+import { Client } from '../../client/entity/client.entity';
 import { Solution } from '../../solution/entities/solution.entity';
 import { PaymentMethod } from '../../paymentMethod/entities/paymentMethod.entity';
 import { Company } from '../../company/entities/company.entity';

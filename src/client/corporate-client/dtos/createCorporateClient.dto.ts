@@ -31,11 +31,11 @@ export class CreateCorporateClientDto {
   @IsString()
   name: string;
 
-  @ApiProperty({example: 7727563778})
-  @IsNumber()
-  INN: number;
+  @ApiProperty({example: '7727563778'})
+  @IsString()
+  INN: string;
 
-  @ApiProperty({example: 773301001})
-  @IsNumber()
-  KPP: number;
+  @ApiProperty({example: '773301001'})
+  @IsString()
+  KPP: string;
 }

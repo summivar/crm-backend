@@ -12,6 +12,8 @@ import { User } from '../../user/entities/user.entity';
 import { Solution } from '../../solution/entities/solution.entity';
 import { Order } from '../../order/entities/order.entity';
 import { AbstractEntity } from '../../common/entity/abstract.entity';
+import { CorporateClient } from '../../client/corporate-client/entity/corporateClient.entity';
+import { IndividualClient } from '../../client/individual-client/entity/individualClient.entity';
 
 @Entity()
 export class Company extends AbstractEntity<Company> {
@@ -41,6 +43,12 @@ export class Company extends AbstractEntity<Company> {
 
   @OneToMany(() => User, user => user.company)
   users: User[];
+
+  @OneToMany(() => CorporateClient, corporateClient => corporateClient.company)
+  corporateClients: CorporateClient[];
+
+  @OneToMany(() => IndividualClient, individualClient => individualClient.company)
+  individualClients: IndividualClient[];
 
   @OneToMany(() => Solution, solution => solution.company)
   solutions: Solution[];

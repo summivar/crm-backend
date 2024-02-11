@@ -4,7 +4,7 @@ import { Company } from './entities/company.entity';
 import { Repository } from 'typeorm';
 import { EXCEPTION_MESSAGE } from '../constants';
 
-export type EntityType = 'order' | 'solution' | 'paymentMethod' | 'status' | 'infoTracer';
+export type EntityType = 'order' | 'solution' | 'paymentMethod' | 'status' | 'infoTracer' | 'individualClient' | 'corporateClient';
 
 @Injectable()
 export class CompanyService {
@@ -22,6 +22,8 @@ export class CompanyService {
       .leftJoinAndSelect('company.users', 'users')
       .leftJoinAndSelect('company.solutions', 'solutions')
       .leftJoinAndSelect('company.orders', 'orders')
+      .leftJoinAndSelect('company.individualClients', 'individualClients')
+      .leftJoinAndSelect('company.corporateClients', 'corporateClients')
       .getManyAndCount();
   }
 
@@ -29,7 +31,6 @@ export class CompanyService {
     return this.companyRepository
       .createQueryBuilder('company')
       .leftJoinAndSelect('company.users', 'users')
-      .leftJoinAndSelect('company.statuses', 'statuses')
       .where('company.id = :id', {id})
       .getOne();
   }
@@ -52,6 +53,12 @@ export class CompanyService {
         break;
       case 'infoTracer':
         relation = 'company.infoTracers';
+        break;
+      case 'corporateClient':
+        relation = 'company.corporateClients';
+        break;
+      case 'individualClient':
+        relation = 'company.individualClients';
         break;
       default:
         throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.INVALID_DATA);
@@ -83,6 +90,12 @@ export class CompanyService {
         break;
       case 'infoTracer':
         relation = 'company.infoTracers';
+        break;
+      case 'corporateClient':
+        relation = 'company.corporateClients';
+        break;
+      case 'individualClient':
+        relation = 'company.individualClients';
         break;
       default:
         throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.INVALID_DATA);

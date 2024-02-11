@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { IndividualClient } from '../entities/individualClient.entity';
 import { IndividualClientService } from './individual-client.service';
 import { IndividualClientController } from './individual-client.controller';
+import { IndividualClient } from './entity/individualClient.entity';
 
 @Module({
   imports: [

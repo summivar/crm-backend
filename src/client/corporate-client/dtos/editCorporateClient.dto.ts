@@ -20,20 +20,20 @@ export class EditCorporateClientDto {
     strictSeparator: true,
   })
   @IsOptional()
-  birthday: Date;
+  dateOfCreation: Date;
 
   @ApiProperty({example: 'ООО КрутаяГрупп'})
   @IsString()
   @IsOptional()
   name: string;
 
-  @ApiProperty({example: 7727563778})
-  @IsNumber()
+  @ApiProperty({example: '7727563778'})
+  @IsString()
   @IsOptional()
-  INN: number;
+  INN: string;
 
-  @ApiProperty({example: 773301001})
-  @IsNumber()
+  @ApiProperty({example: '773301001'})
+  @IsString()
   @IsOptional()
-  KPP: number;
+  KPP: string;
 }

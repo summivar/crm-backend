@@ -1,6 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-import { InfoTracer } from '../../infoTracer/entities/infoTracer.entity';
-import { Client } from './client.entity';
+import { Client } from '../../entity/client.entity';
+import { InfoTracer } from '../../../infoTracer/entities/infoTracer.entity';
+import { Company } from '../../../company/entities/company.entity';
 
 @Entity()
 export class IndividualClient extends Client {
@@ -27,4 +28,8 @@ export class IndividualClient extends Client {
   @ManyToOne(() => InfoTracer, infoTracer => infoTracer.individualClients)
   @JoinColumn({name: 'infoTracerId'})
   infoTracer: InfoTracer;
+
+  @ManyToOne(() => Company, company => company.individualClients)
+  @JoinColumn({name: 'companyId'})
+  company: Company;
 }

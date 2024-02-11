@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IndividualClient } from '../entities/individualClient.entity';
 import { Repository } from 'typeorm';
 import { CreateIndividualClientDto } from './dtos';
+import { IndividualClient } from './entity/individualClient.entity';
 
 @Injectable()
 export class IndividualClientService {
