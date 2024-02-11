@@ -1,7 +1,7 @@
 import * as crypto from 'crypto';
 
 export class CryptService {
-  private static readonly secretKey = 'your_secret_key';
+  private static readonly secretKey = 'TooHardStrongSigmaKey';
 
   static encrypt(id: number, role: string): string {
     const data = `${id}:${role}`;
