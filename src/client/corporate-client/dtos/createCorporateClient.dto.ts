@@ -10,6 +10,10 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateCorporateClientDto {
+  @ApiProperty({example: 1})
+  @IsNumber()
+  infoTracerId: number;
+
   @ApiProperty({example: '+79005553535'})
   @IsString()
   @IsPhoneNumber('RU')
@@ -20,7 +24,7 @@ export class CreateCorporateClientDto {
   @ArrayMinSize(1)
   addresses: string[];
 
-  @ApiProperty({ example: '2024-01-11T11:42:46+0000' })
+  @ApiProperty({example: '2024-01-11T11:42:46+0000'})
   @IsDateString({
     strict: true,
     strictSeparator: true,

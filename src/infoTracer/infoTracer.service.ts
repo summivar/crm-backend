@@ -70,6 +70,10 @@ export class InfoTracerService {
       }
     });
 
+    if (!infoTracer) {
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+    }
+
     if (dto.name) {
       const existingInfoTracer = company.infoTracers.find(infoTracer => infoTracer.name === dto.name);
       if (existingInfoTracer) {

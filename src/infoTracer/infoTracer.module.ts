@@ -15,7 +15,8 @@ import { InfoTracer } from './entities/infoTracer.entity';
     CompanyModule
   ],
   controllers: [InfoTracerController],
-  providers: [InfoTracerService]
+  providers: [InfoTracerService],
+  exports: [InfoTracerService]
 })
 export class InfoTracerModule {
 }

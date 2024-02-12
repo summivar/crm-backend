@@ -1,7 +1,11 @@
-import { ArrayMinSize, IsArray, IsDateString, IsPhoneNumber, IsString } from 'class-validator';
+import { ArrayMinSize, IsArray, IsDateString, IsNumber, IsPhoneNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateIndividualClientDto {
+  @ApiProperty({example: 1})
+  @IsNumber()
+  infoTracerId: number;
+
   @ApiProperty({example: '+79005553535'})
   @IsString()
   @IsPhoneNumber('RU')

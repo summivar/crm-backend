@@ -72,6 +72,10 @@ export class SolutionService {
       }
     });
 
+    if (!solution) {
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+    }
+
     if (dto.name) {
       const existingSolution = company.solutions.find(solution => solution.name === dto.name);
       if (existingSolution) {

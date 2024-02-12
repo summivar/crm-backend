@@ -2,6 +2,10 @@ import { ArrayMinSize, IsArray, IsDateString, IsNumber, IsOptional, IsPhoneNumbe
 import { ApiProperty } from '@nestjs/swagger';
 
 export class EditCorporateClientDto {
+  @ApiProperty({example: 1})
+  @IsNumber()
+  infoTracerId: number;
+
   @ApiProperty({example: '+79005553535'})
   @IsString()
   @IsPhoneNumber('RU')

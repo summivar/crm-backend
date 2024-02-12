@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CorporateClient } from './entity/corporateClient.entity';
 import { UserModule } from '../../user/user.module';
 import { CompanyModule } from '../../company/company.module';
+import { InfoTracerModule } from '../../infoTracer/infoTracer.module';
 
 @Module({
   imports: [
@@ -12,7 +13,8 @@ import { CompanyModule } from '../../company/company.module';
       CorporateClient
     ]),
     UserModule,
-    CompanyModule
+    CompanyModule,
+    InfoTracerModule
   ],
   controllers: [CorporateClientController],
   providers: [CorporateClientService],

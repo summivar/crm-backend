@@ -6,13 +6,15 @@ import { CorporateClient } from './entity/corporateClient.entity';
 import { CompanyService } from '../../company/company.service';
 import { EXCEPTION_MESSAGE } from '../../constants';
 import { EditPaymentMethodDto } from '../../paymentMethod/dtos';
+import { InfoTracerService } from '../../infoTracer/infoTracer.service';
 
 @Injectable()
 export class CorporateClientService {
   constructor(
     @InjectRepository(CorporateClient) private corporateClientRepository: Repository<CorporateClient>,
     private readonly entityManager: EntityManager,
-    private readonly companyService: CompanyService
+    private readonly companyService: CompanyService,
+    private readonly infoTracerService: InfoTracerService
   ) {
   }
 
@@ -42,13 +44,20 @@ export class CorporateClientService {
       throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
     }
 
+    const infoTracer = await this.infoTracerService.getById(dto.infoTracerId, companyId);
+
+    if (!infoTracer) {
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+    }
+
     const newClient = await this.corporateClientRepository.save({
       phone: dto.phone,
       addresses: dto.addresses,
       dateOfCreation: dto.dateOfCreation,
       name: dto.name,
       KPP: dto.KPP,
-      INN: dto.INN
+      INN: dto.INN,
+      infoTracer: infoTracer
     });
 
     company.corporateClients.push(newClient);
@@ -69,6 +78,10 @@ export class CorporateClientService {
         id: corporateClientId
       }
     });
+
+    if (!corporateClient) {
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+    }
 
     if (dto.phone) {
       corporateClient.phone = dto.phone;
@@ -92,6 +105,16 @@ export class CorporateClientService {
 
     if (dto.KPP) {
       corporateClient.KPP = dto.KPP;
+    }
+
+    if (dto.infoTracerId) {
+      const infoTracer = await this.infoTracerService.getById(dto.infoTracerId, companyId);
+
+      if (!infoTracer) {
+        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      }
+
+      corporateClient.infoTracer = infoTracer;
     }
 
     return this.corporateClientRepository.save(corporateClient);

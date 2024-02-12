@@ -30,7 +30,7 @@ export class StatusService {
       .createQueryBuilder('status')
       .leftJoinAndSelect('status.orders', 'orders')
       .leftJoinAndSelect('status.company', 'company')
-      .where('company.id = :company', {companyId})
+      .where('company.id = :companyId', {companyId})
       .getManyAndCount();
   }
 

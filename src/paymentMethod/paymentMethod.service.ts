@@ -68,6 +68,10 @@ export class PaymentMethodService {
       }
     });
 
+    if (!paymentMethod) {
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+    }
+
     if (dto.name) {
       const existingPaymentMethod = company.paymentMethods.find(paymentMethod => paymentMethod.name === dto.name);
       if (existingPaymentMethod) {
