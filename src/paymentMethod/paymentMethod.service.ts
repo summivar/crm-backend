@@ -18,7 +18,6 @@ export class PaymentMethodService {
   async getById(paymentMethodId: number, companyId: number) {
     return this.paymentMethodRepository
       .createQueryBuilder('paymentMethod')
-      .leftJoinAndSelect('paymentMethod.orders', 'orders')
       .leftJoinAndSelect('paymentMethod.company', 'company')
       .where('paymentMethod.id = :paymentMethodId', {paymentMethodId})
       .andWhere('company.id = :companyId', {companyId})
@@ -28,7 +27,6 @@ export class PaymentMethodService {
   async getAll(companyId: number) {
     return this.paymentMethodRepository
       .createQueryBuilder('paymentMethod')
-      .leftJoinAndSelect('paymentMethod.orders', 'orders')
       .leftJoinAndSelect('paymentMethod.company', 'company')
       .where('company.id = :companyId', {companyId})
       .getManyAndCount();

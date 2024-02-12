@@ -21,6 +21,13 @@ export class UserService {
     return this.userRepository.save(user);
   }
 
+  async getUserById(userId: number) {
+    return this.userRepository
+      .createQueryBuilder('user')
+      .where('user.id = :userId', {userId})
+      .getOne();
+  }
+
   async getUserByPhone(phone: string) {
     return this.userRepository
       .createQueryBuilder('user')

@@ -13,6 +13,7 @@ import { CompanyModule } from './company/company.module';
 import { StatusModule } from './status/status.module';
 import { PaymentMethodModule } from './paymentMethod/paymentMethod.module';
 import { SolutionModule } from './solution/solution.module';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -50,7 +51,8 @@ import { SolutionModule } from './solution/solution.module';
     CompanyModule,
     StatusModule,
     PaymentMethodModule,
-    SolutionModule
+    SolutionModule,
+    OrderModule
   ],
 })
 export class AppModule {

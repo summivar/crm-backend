@@ -27,12 +27,19 @@ export class CompanyService {
       .getManyAndCount();
   }
 
-  async getCompanyById(id: number) {
-    return this.companyRepository
-      .createQueryBuilder('company')
-      .leftJoinAndSelect('company.users', 'users')
-      .where('company.id = :id', {id})
-      .getOne();
+  async getCompanyById(id: number, withUser: boolean = true) {
+    if (withUser) {
+      return this.companyRepository
+        .createQueryBuilder('company')
+        .leftJoinAndSelect('company.users', 'users')
+        .where('company.id = :id', {id})
+        .getOne();
+    } else {
+      return this.companyRepository
+        .createQueryBuilder('company')
+        .where('company.id = :id', {id})
+        .getOne();
+    }
   }
 
   async getCompanyWithEntityId(companyId: number, entityId: number, entityType: EntityType) {

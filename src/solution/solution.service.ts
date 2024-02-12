@@ -18,7 +18,6 @@ export class SolutionService {
   async getById(solutionId: number, companyId: number) {
     return this.solutionRepository
       .createQueryBuilder('solution')
-      .leftJoinAndSelect('solution.orders', 'orders')
       .leftJoinAndSelect('solution.company', 'company')
       .where('solution.id = :solutionId', {solutionId})
       .andWhere('company.id = :companyId', {companyId})

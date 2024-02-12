@@ -11,11 +11,13 @@ import {
 import { Status } from '../../status/entities/status.entity';
 import { Client as ClientEnum } from '../../client/enums';
 import { User } from '../../user/entities/user.entity';
-import { Client } from '../../client/entity/client.entity';
 import { Solution } from '../../solution/entities/solution.entity';
 import { PaymentMethod } from '../../paymentMethod/entities/paymentMethod.entity';
 import { Company } from '../../company/entities/company.entity';
 import { AbstractEntity } from '../../common/entity/abstract.entity';
+import { IndividualClient } from '../../client/individual-client/entity/individualClient.entity';
+import { CorporateClient } from '../../client/corporate-client/entity/corporateClient.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class Order extends AbstractEntity<Order> {
@@ -41,8 +43,8 @@ export class Order extends AbstractEntity<Order> {
   })
   address: string;
 
-  @Column({
-    nullable: false
+  @Column('decimal', {
+    nullable: false,
   })
   price: number;
 
@@ -83,12 +85,17 @@ export class Order extends AbstractEntity<Order> {
   @JoinColumn({name: 'paymentMethodId'})
   paymentMethod: PaymentMethod;
 
-  @ManyToOne(() => Client)
-  @JoinColumn({name: 'clientId'})
-  client: Client;
+  @ManyToOne(() => IndividualClient)
+  @JoinColumn({name: 'individualClientId'})
+  individualClient: IndividualClient;
+
+  @ManyToOne(() => CorporateClient)
+  @JoinColumn({name: 'corporateClientId'})
+  corporateClient: CorporateClient;
 
   @ManyToOne(() => Company)
   @JoinColumn({name: 'companyId'})
+  @Exclude()
   company: Company;
 
   @ManyToOne(() => Status, status => status.orders)

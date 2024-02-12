@@ -14,6 +14,7 @@ import { Order } from '../../order/entities/order.entity';
 import { AbstractEntity } from '../../common/entity/abstract.entity';
 import { CorporateClient } from '../../client/corporate-client/entity/corporateClient.entity';
 import { IndividualClient } from '../../client/individual-client/entity/individualClient.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 export class Company extends AbstractEntity<Company> {

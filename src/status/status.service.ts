@@ -18,7 +18,6 @@ export class StatusService {
   async getById(statusId: number, companyId: number) {
     return this.statusRepository
       .createQueryBuilder('status')
-      .leftJoinAndSelect('status.orders', 'orders')
       .leftJoinAndSelect('status.company', 'company')
       .where('status.id = :statusId', {statusId})
       .andWhere('company.id = :companyId', {companyId})

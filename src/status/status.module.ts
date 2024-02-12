@@ -15,7 +15,8 @@ import { CompanyModule } from '../company/company.module';
     CompanyModule
   ],
   controllers: [StatusController],
-  providers: [StatusService]
+  providers: [StatusService],
+  exports: [StatusService],
 })
 export class StatusModule {
 }

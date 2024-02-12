@@ -15,7 +15,8 @@ import { Solution } from './entities/solution.entity';
     CompanyModule
   ],
   controllers: [SolutionController],
-  providers: [SolutionService]
+  providers: [SolutionService],
+  exports: [SolutionService],
 })
 export class SolutionModule {
 }

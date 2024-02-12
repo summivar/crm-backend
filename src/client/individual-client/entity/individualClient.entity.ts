@@ -1,10 +1,25 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-import { Client } from '../../entity/client.entity';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { InfoTracer } from '../../../infoTracer/entities/infoTracer.entity';
 import { Company } from '../../../company/entities/company.entity';
+import { Order } from '../../../order/entities/order.entity';
 
 @Entity()
-export class IndividualClient extends Client {
+export class IndividualClient {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({
+    unique: true,
+    nullable: false,
+  })
+  phone: string;
+
+  @Column({
+    type: 'simple-array',
+    nullable: false
+  })
+  addresses: string[];
+
   @Column({
     nullable: false,
   })
@@ -32,4 +47,7 @@ export class IndividualClient extends Client {
   @ManyToOne(() => Company, company => company.individualClients)
   @JoinColumn({name: 'companyId'})
   company: Company;
+
+  @OneToMany(() => Order, order => order.individualClient)
+  orders: Order[];
 }

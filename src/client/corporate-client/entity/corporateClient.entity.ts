@@ -4,7 +4,7 @@ import { Company } from '../../../company/entities/company.entity';
 import { Order } from '../../../order/entities/order.entity';
 
 @Entity()
-class Client extends BaseEntity {
+export class CorporateClient {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -20,12 +20,6 @@ class Client extends BaseEntity {
   })
   addresses: string[];
 
-  @OneToMany(() => Order, order => order.client)
-  orders: Order[];
-}
-
-@Entity()
-export class CorporateClient extends Client {
   @Column({
     unique: true,
     nullable: false,
@@ -50,10 +44,13 @@ export class CorporateClient extends Client {
   dateOfCreation: Date;
 
   @ManyToOne(() => InfoTracer, infoTracer => infoTracer.corporateClients)
-  @JoinColumn({ name: 'infoTracerId' })
+  @JoinColumn({name: 'infoTracerId'})
   infoTracer: InfoTracer;
 
   @ManyToOne(() => Company, company => company.corporateClients)
-  @JoinColumn({ name: 'companyId' })
+  @JoinColumn({name: 'companyId'})
   company: Company;
+
+  @OneToMany(() => Order, order => order.corporateClient)
+  orders: Order[];
 }
