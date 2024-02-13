@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { OrderService } from './order.service';
 import { UserRequest } from '../auth/types';
@@ -6,11 +6,24 @@ import { Roles } from '../auth/decorators';
 import { Role } from '../auth/enums';
 import { RolesGuard } from '../auth/guards';
 import { CreateOrderDto, EditOrderDto } from './dtos';
+import { GetOrdersFilterDto } from './dtos/getOrderFilter.dto';
 
 @ApiTags('Заказы')
 @Controller('order')
 export class OrderController {
   constructor(private orderService: OrderService) {
+  }
+
+  @ApiOperation({ summary: 'Получение заказа по фильтрам' })
+  @ApiBearerAuth('JWT-auth')
+  @Roles(Role.ADMIN, Role.MANAGER)
+  @UseGuards(RolesGuard)
+  @Get('get')
+  async getFiltered(
+    @Req() req: UserRequest,
+    @Query() filterDto: GetOrdersFilterDto,
+  ) {
+    return this.orderService.getFiltered(filterDto, req.user.company);
   }
 
   @ApiOperation({ summary: 'Получение заказа по ID' })

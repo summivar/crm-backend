@@ -40,13 +40,13 @@ export class IndividualClientService {
     const company = await this.companyService.getCompanyWithEntity(companyId, 'individualClient');
 
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('company'));
     }
 
     const infoTracer = await this.infoTracerService.getById(dto.infoTracerId, companyId);
 
     if (!infoTracer) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('infoTracer'));
     }
 
     const newClient = await this.individualClientRepository.save({
@@ -70,7 +70,7 @@ export class IndividualClientService {
     const company = await this.companyService.getCompanyWithEntityId(companyId, individualClientId, 'individualClient');
 
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('company'));
     }
 
     const individualClient = await this.individualClientRepository.findOne({
@@ -80,7 +80,7 @@ export class IndividualClientService {
     });
 
     if (!individualClient) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('individualClient'));
     }
 
     if (dto.name) {
@@ -103,7 +103,7 @@ export class IndividualClientService {
       const infoTracer = await this.infoTracerService.getById(dto.infoTracerId, companyId);
 
       if (!infoTracer) {
-        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('infoTracer'));
       }
 
       individualClient.infoTracer = infoTracer;
@@ -120,7 +120,7 @@ export class IndividualClientService {
 
     const individualClient = company.corporateClients.find(individualClient => individualClient.id === individualClientId);
     if (!individualClient) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('individualClient'));
     }
 
     await this.individualClientRepository.remove(individualClient as any);

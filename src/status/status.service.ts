@@ -36,7 +36,7 @@ export class StatusService {
   async create(dto: CreateStatusDto, companyId: number) {
     const company = await this.companyService.getCompanyWithEntity(companyId, 'status');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('company'));
     }
 
     const existingStatus = company.statuses.find(status => status.name === dto.name);
@@ -59,7 +59,7 @@ export class StatusService {
   async edit(dto: EditStatusDto, statusId: number, companyId: number) {
     const company = await this.companyService.getCompanyWithEntityId(companyId, statusId, 'status');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('company'));
     }
 
     const status = await this.statusRepository.findOne({
@@ -92,7 +92,7 @@ export class StatusService {
 
     const status = company.solutions.find(status => status.id === statusId);
     if (!status) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('status'));
     }
 
     await this.statusRepository.remove(status as any);

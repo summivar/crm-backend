@@ -61,7 +61,7 @@ export class UserService {
   async edit(dto: EditUserDto, userId: number, fromId: number, photo: Express.Multer.File) {
     const user = await this.userRepository.findOneBy({id: userId});
     if (!user) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('user'));
     }
 
     if (userId !== fromId) {

@@ -13,6 +13,7 @@ import { IndividualClientService } from '../client/individual-client/individual-
 import { CorporateClientService } from '../client/corporate-client/corporate-client.service';
 import { IndividualClient } from '../client/individual-client/entity/individualClient.entity';
 import { CorporateClient } from '../client/corporate-client/entity/corporateClient.entity';
+import { GetOrdersFilterDto } from './dtos/getOrderFilter.dto';
 
 @Injectable()
 export class OrderService {
@@ -27,6 +28,92 @@ export class OrderService {
     private readonly individualClientService: IndividualClientService,
     private readonly corporateClientService: CorporateClientService,
   ) {
+  }
+
+  async getFiltered(dto: GetOrdersFilterDto, companyId: number) {
+    const {
+      statusId,
+      managerId,
+      dateFrom,
+      dateTo,
+      clientType,
+      clientId,
+      solutionIds,
+      stuffIds,
+      priceFrom,
+      priceTo,
+      paymentMethodId,
+    } = dto;
+
+    let query = this.orderRepository.createQueryBuilder('order')
+      .leftJoinAndSelect('order.company', 'company')
+      .where('company.id = :companyId', { companyId: Number(companyId) });
+
+    query = query.leftJoinAndSelect('order.status', 'status');
+    if (statusId) {
+      query = query.andWhere('status.id = :statusId', { statusId: Number(statusId) });
+    }
+
+    query = query.leftJoinAndSelect('order.user', 'user');
+    if (managerId) {
+      query = query.andWhere('user.id = :managerId', { managerId: Number(managerId) });
+    }
+
+    if (dateFrom) {
+      query = query.andWhere('order.orderDate >= :dateFrom', { dateFrom });
+    }
+    if (dateTo) {
+      query = query.andWhere('order.orderDate <= :dateTo', { dateTo });
+    }
+
+    if (clientType === 'individualClient' && clientId) {
+      query = query.leftJoinAndSelect('order.individualClient', 'individualClient');
+      query = query.andWhere('individualClient.id = :clientId', { clientId: Number(clientId) });
+    }
+    if (clientType === 'corporateClient' && clientId) {
+      query = query.leftJoinAndSelect('order.corporateClient', 'corporateClient');
+      query = query.andWhere('corporateClient.id = :clientId', { clientId: Number(clientId) });
+    }
+
+    query = query.leftJoinAndSelect('order.solutions', 'solution');
+    if (solutionIds) {
+      let numericArray: number[] = [];
+      if (Array.isArray(solutionIds)) {
+        numericArray = solutionIds.map(Number);
+      } else {
+        numericArray.push(Number(solutionIds));
+      }
+      if (numericArray.length > 0) {
+        query = query.andWhere('solution.id IN (:...solutionIds)', { solutionIds: numericArray });
+      }
+    }
+
+    query = query.leftJoinAndSelect('order.stuff', 'stuff');
+    if (stuffIds) {
+      let numericArray: number[] = [];
+      if (Array.isArray(stuffIds)) {
+        numericArray = stuffIds.map(Number);
+      } else {
+        numericArray.push(Number(stuffIds));
+      }
+      if (numericArray.length > 0) {
+        query = query.andWhere('stuff.id IN (:...stuffIds)', { stuffIds: numericArray });
+      }
+    }
+
+    if (priceFrom) {
+      query = query.andWhere('order.price >= :priceFrom', { priceFrom: Number(priceFrom) });
+    }
+    if (priceTo) {
+      query = query.andWhere('order.price <= :priceTo', { priceTo: Number(priceTo) });
+    }
+
+    query = query.leftJoinAndSelect('order.paymentMethod', 'paymentMethod');
+    if (paymentMethodId) {
+      query = query.andWhere('paymentMethod.id = :paymentMethodId', { paymentMethodId: Number(paymentMethodId) });
+    }
+
+    return await query.getManyAndCount();
   }
 
   async getById(companyId: number, orderId: number) {
@@ -63,7 +150,7 @@ export class OrderService {
   async create(dto: CreateOrderDto, companyId: number, userId: number) {
     const company = await this.companyService.getCompanyById(companyId, false);
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('company'));
     }
 
     const companyWithOrders = await this.companyService.getCompanyWithEntity(companyId, 'order');
@@ -78,46 +165,46 @@ export class OrderService {
     }
 
     if (!client) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('client'));
     }
 
     const user = await this.userService.getUserById(userId);
     if (!user) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('user'));
     }
 
     const paymentMethod = await this.paymentMethodService.getById(dto.paymentMethodId, companyId);
     if (!paymentMethod) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('paymentMethod'));
     }
 
     const status = await this.statusService.getById(dto.statusId, companyId);
     if (!status) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('status'));
     }
 
     const solutions = await Promise.all(dto.solutionsIds.map(async (solutionId) => {
       const solution = await this.solutionService.getById(solutionId, companyId);
       if (!solution) {
-        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('solution'));
       }
       return solution;
     }));
 
     if (!solutions.length) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('solution'));
     }
 
-    const stuff = await Promise.all(dto.solutionsIds.map(async (userId) => {
+    const stuff = await Promise.all(dto.stuffIds.map(async (userId) => {
       const user = await this.userService.getUserById(userId);
       if (!user) {
-        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('user'));
       }
       return user;
     }));
 
     if (!stuff.length) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('stuff'));
     }
 
     return this.orderRepository.save({
@@ -142,7 +229,7 @@ export class OrderService {
   async edit(dto: EditOrderDto, companyId: number, orderId: number) {
     const company = await this.companyService.getCompanyWithEntityId(companyId, orderId, 'order');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('company'));
     }
 
     const order = await this.orderRepository.findOne({
@@ -152,7 +239,7 @@ export class OrderService {
     });
 
     if (!order) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('order'));
     }
 
     if (dto.clientType && dto.clientId) {
@@ -164,7 +251,7 @@ export class OrderService {
       }
 
       if (!client) {
-        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('client'));
       }
 
       if (dto.clientType === 'individualClient') {
@@ -196,7 +283,7 @@ export class OrderService {
     if (dto.paymentMethodId) {
       const paymentMethod = await this.paymentMethodService.getById(dto.paymentMethodId, companyId);
       if (!paymentMethod) {
-        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('paymentMethod'));
       }
 
       order.paymentMethod = paymentMethod;
@@ -205,7 +292,7 @@ export class OrderService {
     if (dto.statusId) {
       const status = await this.statusService.getById(dto.statusId, companyId);
       if (!status) {
-        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('status'));
       }
 
       order.status = status;
@@ -215,29 +302,29 @@ export class OrderService {
       const solutions = await Promise.all(dto.solutionsIds.map(async (solutionId) => {
         const solution = await this.solutionService.getById(solutionId, companyId);
         if (!solution) {
-          throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+          throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('solution'));
         }
         return solution;
       }));
 
       if (!solutions.length) {
-        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('solution'));
       }
 
       order.solutions = solutions;
     }
 
     if (dto.stuffIds.length) {
-      const stuff = await Promise.all(dto.solutionsIds.map(async (userId) => {
+      const stuff = await Promise.all(dto.stuffIds.map(async (userId) => {
         const user = await this.userService.getUserById(userId);
         if (!user) {
-          throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+          throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('stuff'));
         }
         return user;
       }));
 
       if (!stuff.length) {
-        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('stuff'));
       }
 
       order.stuff = stuff;
@@ -254,7 +341,7 @@ export class OrderService {
 
     const order = company.orders.find(order => order.id === orderId);
     if (!order) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('order'));
     }
 
     await this.orderRepository.remove(order as any);
