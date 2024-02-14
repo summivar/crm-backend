@@ -42,3 +42,4 @@ uploads
 
 # database
 mongo_db
+migrations
