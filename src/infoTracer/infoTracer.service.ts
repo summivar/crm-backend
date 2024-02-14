@@ -39,7 +39,7 @@ export class InfoTracerService {
   async create(dto: CreateInfoTracerDto, companyId: number) {
     const company = await this.companyService.getCompanyWithEntity(companyId, 'infoTracer');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('company'));
     }
 
     const existingInfoTracer = company.infoTracers.find(infoTracer => infoTracer.name === dto.name);
@@ -61,7 +61,7 @@ export class InfoTracerService {
   async edit(dto: EditInfoTracerDto, infoTracerId: number, companyId: number) {
     const company = await this.companyService.getCompanyWithEntityId(companyId, infoTracerId, 'infoTracer');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('company'));
     }
 
     const infoTracer = await this.infoTracerRepository.findOne({
@@ -71,7 +71,7 @@ export class InfoTracerService {
     });
 
     if (!infoTracer) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('infoTracer'));
     }
 
     if (dto.name) {
@@ -94,7 +94,7 @@ export class InfoTracerService {
 
     const infoTracer = company.infoTracers.find(infoTracer => infoTracer.id === infoTracerId);
     if (!infoTracer) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('infoTracer'));
     }
 
     await this.infoTracerRepository.remove(infoTracer as any);

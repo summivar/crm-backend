@@ -35,7 +35,7 @@ export class PaymentMethodService {
   async create(dto: CreatePaymentMethodDto, companyId: number) {
     const company = await this.companyService.getCompanyWithEntity(companyId, 'paymentMethod');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('company'));
     }
 
     const existingPaymentMethod = company.paymentMethods.find(paymentMethod => paymentMethod.name === dto.name);
@@ -57,7 +57,7 @@ export class PaymentMethodService {
   async edit(dto: EditPaymentMethodDto, paymentMethodId: number, companyId: number) {
     const company = await this.companyService.getCompanyWithEntityId(companyId, paymentMethodId, 'paymentMethod');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('company'));
     }
 
     const paymentMethod = await this.paymentMethodRepository.findOne({
@@ -67,7 +67,7 @@ export class PaymentMethodService {
     });
 
     if (!paymentMethod) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('paymentMethod'));
     }
 
     if (dto.name) {
@@ -90,7 +90,7 @@ export class PaymentMethodService {
 
     const paymentMethod = company.paymentMethods.find(paymentMethod => paymentMethod.id === paymentMethodId);
     if (!paymentMethod) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('paymentMethod'));
     }
 
     await this.paymentMethodRepository.remove(paymentMethod as any);

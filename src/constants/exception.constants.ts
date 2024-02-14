@@ -1,7 +1,7 @@
 export const EXCEPTION_MESSAGE = {
   BAD_REQUEST_EXCEPTION: {
     INVALID_DATA: 'Incorrect data in request',
-    NOT_FOUND_BY_ID: 'Not found by id',
+    NOT_FOUND_BY_ID: (entity: string) => `Not found by id (${entity})`,
     NOT_FOUND: 'Not found, entity does not exists',
     ALREADY_EXISTS: 'Entity already exists',
     SOMETHING_GO_WRONG: 'Something go wrong',

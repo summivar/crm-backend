@@ -41,13 +41,13 @@ export class CorporateClientService {
     const company = await this.companyService.getCompanyWithEntity(companyId, 'corporateClient');
 
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('company'));
     }
 
     const infoTracer = await this.infoTracerService.getById(dto.infoTracerId, companyId);
 
     if (!infoTracer) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('infoTracer'));
     }
 
     const newClient = await this.corporateClientRepository.save({
@@ -70,7 +70,7 @@ export class CorporateClientService {
   async edit(dto: EditCorporateClientDto, corporateClientId: number, companyId: number) {
     const company = await this.companyService.getCompanyWithEntityId(companyId, corporateClientId, 'corporateClient');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('company'));
     }
 
     const corporateClient = await this.corporateClientRepository.findOne({
@@ -80,7 +80,7 @@ export class CorporateClientService {
     });
 
     if (!corporateClient) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('corporateClient'));
     }
 
     if (dto.phone) {
@@ -111,7 +111,7 @@ export class CorporateClientService {
       const infoTracer = await this.infoTracerService.getById(dto.infoTracerId, companyId);
 
       if (!infoTracer) {
-        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('infoTracer'));
       }
 
       corporateClient.infoTracer = infoTracer;
@@ -128,7 +128,7 @@ export class CorporateClientService {
 
     const corporateClient = company.corporateClients.find(corporateClient => corporateClient.id === corporateClientId);
     if (!corporateClient) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID);
+      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('corporateClient'));
     }
 
     await this.corporateClientRepository.remove(corporateClient as any);
