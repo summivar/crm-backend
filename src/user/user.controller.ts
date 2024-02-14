@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -32,12 +31,6 @@ export class UserController {
   @Get('get/all')
   async getAll() {
     return this.userService.getAllUsers();
-  }
-
-  @ApiOperation({summary: 'Удаление всех пользователей ( и компаний )'})
-  @Delete('deleteAll')
-  async deleteAll() {
-    return this.userService.deleteAll();
   }
 
   @ApiOperation({summary: 'Изменение пользователя'})

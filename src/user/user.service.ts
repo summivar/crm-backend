@@ -126,16 +126,6 @@ export class UserService {
     return userData;
   }
 
-  async deleteAllUsers() {
-    return this.userRepository.delete({});
-  }
-
-  async deleteAll() {
-    await this.deleteAllUsers();
-    await this.companyService.deleteAll();
-    return true;
-  }
-
   async getAllUsers() {
     return this.userRepository.find({
       where: {},
