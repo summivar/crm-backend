@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
-import { CreateIndividualClientDto, EditIndividualClientDto } from './dtos';
+import { CreateIndividualClientDto, EditIndividualClientDto, GetIndividualClientsFilterDto } from './dtos';
 import { IndividualClient } from './entity/individualClient.entity';
 import { CompanyService } from '../../company/company.service';
 import { InfoTracerService } from '../../infoTracer/infoTracer.service';
@@ -15,6 +15,42 @@ export class IndividualClientService {
     private readonly companyService: CompanyService,
     private readonly infoTracerService: InfoTracerService
   ) {
+  }
+
+  async getFiltered(dto: GetIndividualClientsFilterDto, companyId: number) {
+    const {
+      dateFrom,
+      dateTo,
+      someAddresses,
+      infoTracerId
+    } = dto;
+
+    let query = this.individualClientRepository.createQueryBuilder('individualClient')
+      .leftJoinAndSelect('individualClient.company', 'company')
+      .where('company.id = :companyId', { companyId: Number(companyId) });
+
+    if (dateFrom) {
+      query = query.andWhere('individualClient.birthday >= :dateFrom', { dateFrom });
+    }
+
+    if (dateTo) {
+      query = query.andWhere('individualClient.birthday <= :dateTo', { dateTo });
+    }
+
+    if (someAddresses === 'true') {
+      query = query.andWhere('array_length(individualClient.addresses, 1) > 1');
+    }
+
+    if (someAddresses === 'false') {
+      query = query.andWhere('array_length(individualClient.addresses, 1) <= 1');
+    }
+
+    query = query.leftJoinAndSelect('individualClient.infoTracer', 'infoTracer');
+    if (infoTracerId) {
+      query = query.andWhere('infoTracer.id = :infoTracerId', { infoTracerId: Number(infoTracerId) });
+    }
+
+    return await query.getManyAndCount();
   }
 
   async getById(individualClientId: number, companyId: number) {

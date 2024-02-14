@@ -113,7 +113,7 @@ export class OrderService {
       query = query.andWhere('paymentMethod.id = :paymentMethodId', { paymentMethodId: Number(paymentMethodId) });
     }
 
-    return await query.getManyAndCount();
+    return query.getManyAndCount();
   }
 
   async getById(companyId: number, orderId: number) {

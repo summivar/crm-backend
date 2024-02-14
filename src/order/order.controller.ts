@@ -14,7 +14,7 @@ export class OrderController {
   constructor(private orderService: OrderService) {
   }
 
-  @ApiOperation({ summary: 'Получение заказа по фильтрам' })
+  @ApiOperation({ summary: 'Получение заказов по фильтрам' })
   @ApiBearerAuth('JWT-auth')
   @Roles(Role.ADMIN, Role.MANAGER)
   @UseGuards(RolesGuard)

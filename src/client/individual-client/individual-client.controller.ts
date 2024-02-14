@@ -1,16 +1,28 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { IndividualClientService } from './individual-client.service';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../../auth/decorators';
 import { Role } from '../../auth/enums';
 import { RolesGuard } from '../../auth/guards';
 import { UserRequest } from '../../auth/types';
-import { CreateIndividualClientDto, EditIndividualClientDto } from './dtos';
+import { CreateIndividualClientDto, EditIndividualClientDto, GetIndividualClientsFilterDto } from './dtos';
 
 @ApiTags('Индивидуальные клиенты')
 @Controller('individual-client')
 export class IndividualClientController {
   constructor(private individualClientService: IndividualClientService) {
+  }
+
+  @ApiOperation({ summary: 'Получение инд.клиентов по фильтрам' })
+  @ApiBearerAuth('JWT-auth')
+  @Roles(Role.ADMIN, Role.MANAGER)
+  @UseGuards(RolesGuard)
+  @Get('get')
+  async getFiltered(
+    @Req() req: UserRequest,
+    @Query() filterDto: GetIndividualClientsFilterDto,
+  ) {
+    return this.individualClientService.getFiltered(filterDto, req.user.company);
   }
 
   @ApiOperation({summary: 'Получение инд.клиента по ID'})

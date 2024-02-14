@@ -1,16 +1,28 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { CorporateClientService } from './corporate-client.service';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { Roles } from '../../auth/decorators';
 import { Role } from '../../auth/enums';
 import { RolesGuard } from '../../auth/guards';
 import { UserRequest } from '../../auth/types';
-import { CreateCorporateClientDto, EditCorporateClientDto } from './dtos';
+import { CreateCorporateClientDto, EditCorporateClientDto, GetCorporateClientsFilterDto } from './dtos';
 
 @ApiTags('Юридические клиенты')
 @Controller('corporate-client')
 export class CorporateClientController {
   constructor(private corporateClientService: CorporateClientService) {
+  }
+
+  @ApiOperation({ summary: 'Получение инд.клиентов по фильтрам' })
+  @ApiBearerAuth('JWT-auth')
+  @Roles(Role.ADMIN, Role.MANAGER)
+  @UseGuards(RolesGuard)
+  @Get('get')
+  async getFiltered(
+    @Req() req: UserRequest,
+    @Query() filterDto: GetCorporateClientsFilterDto,
+  ) {
+    return this.corporateClientService.getFiltered(filterDto, req.user.company);
   }
 
   @ApiOperation({summary: 'Получение юр.клиента по ID'})

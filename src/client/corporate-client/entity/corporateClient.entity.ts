@@ -14,8 +14,8 @@ export class CorporateClient {
   })
   phone: string;
 
-  @Column({
-    type: 'simple-array',
+  @Column('text', {
+    array: true,
     nullable: false
   })
   addresses: string[];
