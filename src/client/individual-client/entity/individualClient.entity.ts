@@ -48,6 +48,6 @@ export class IndividualClient {
   @JoinColumn({name: 'companyId'})
   company: Company;
 
-  @OneToMany(() => Order, order => order.individualClient)
+  @OneToMany(() => Order, order => order.individualClient, { cascade: true })
   orders: Order[];
 }

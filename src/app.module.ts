@@ -14,6 +14,7 @@ import { StatusModule } from './status/status.module';
 import { PaymentMethodModule } from './paymentMethod/paymentMethod.module';
 import { SolutionModule } from './solution/solution.module';
 import { OrderModule } from './order/order.module';
+import { DevModule } from './dev/dev.module';
 
 @Module({
   imports: [
@@ -52,7 +53,8 @@ import { OrderModule } from './order/order.module';
     StatusModule,
     PaymentMethodModule,
     SolutionModule,
-    OrderModule
+    OrderModule,
+    DevModule
   ],
 })
 export class AppModule {

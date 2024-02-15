@@ -21,43 +21,56 @@ export class RolesGuard implements CanActivate {
   async canActivate(
     context: ExecutionContext
   ): Promise<boolean> {
+    const requiredRoles = this.reflector.getAllAndOverride<string[]>(
+      ROLES_KEY,
+      [context.getHandler(), context.getClass()]
+    );
+
+    const req = context.switchToHttp().getRequest();
+    const authHeader = req.headers.authorization;
+    let bearer: string, token: string = '';
     try {
-      const requiredRoles = this.reflector.getAllAndOverride<string[]>(
-        ROLES_KEY,
-        [context.getHandler(), context.getClass()]
-      );
-
-      const req = context.switchToHttp().getRequest();
-      const authHeader = req.headers.authorization;
-      const bearer = authHeader.split(' ')[0];
-      const token = authHeader.split(' ')[1];
-
-      if (bearer !== 'Bearer' || !token) {
-        throw new UnauthorizedException(EXCEPTION_MESSAGE.UNAUTHORIZED_EXCEPTION.USER_IS_NOT_AUTHORIZED);
-      }
-
-      if (!requiredRoles) {
-        return true;
-      }
-
-      const payload: Payload = await this.jwtService.verifyAsync(token, {secret: this.configService.get<string>('accessSecret')});
-
-      const user = await this.userService.getUserByPhone(payload.phone);
-
-      if (!user) {
-        throw new UnauthorizedException(EXCEPTION_MESSAGE.UNAUTHORIZED_EXCEPTION.USER_IS_NOT_AUTHORIZED);
-      }
-
-      req.user = {
-        id: user.id,
-        phone: user.phone,
-        role: user.role,
-        company: user.company.id
-      };
-
-      return requiredRoles.includes(user.role);
+      bearer = authHeader.split(' ')[0];
+      token = authHeader.split(' ')[1];
     } catch (e) {
+      throw new UnauthorizedException(EXCEPTION_MESSAGE.UNAUTHORIZED_EXCEPTION.USER_IS_NOT_AUTHORIZED);
+    }
+
+
+    if (bearer !== 'Bearer' || !token) {
+      throw new UnauthorizedException(EXCEPTION_MESSAGE.UNAUTHORIZED_EXCEPTION.USER_IS_NOT_AUTHORIZED);
+    }
+
+    if (!requiredRoles) {
+      return true;
+    }
+
+    let payload: Payload = {};
+
+    try {
+      payload = await this.jwtService.verifyAsync(token, {secret: this.configService.get<string>('accessSecret')});
+    } catch (e) {
+      throw new UnauthorizedException(EXCEPTION_MESSAGE.UNAUTHORIZED_EXCEPTION.USER_IS_NOT_AUTHORIZED);
+    }
+
+
+    const user = await this.userService.getUserByPhone(payload.phone);
+
+    if (!user) {
+      throw new UnauthorizedException(EXCEPTION_MESSAGE.UNAUTHORIZED_EXCEPTION.USER_IS_NOT_AUTHORIZED);
+    }
+
+    req.user = {
+      id: user.id,
+      phone: user.phone,
+      role: user.role,
+      company: user.company.id
+    };
+
+    if (!requiredRoles.includes(user.role)) {
       throw new ForbiddenException(EXCEPTION_MESSAGE.FORBIDDEN_EXCEPTION.NO_RULES_TO_GET);
     }
+
+    return true;
   }
 }

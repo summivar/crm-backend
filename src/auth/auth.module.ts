@@ -5,10 +5,15 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
 import { UserModule } from '../user/user.module';
 import { CommonModule } from '../common/common.module';
 import { CompanyModule } from '../company/company.module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+// import { Confirm } from './entities/confirm.entity';
 
 @Global()
 @Module({
   imports: [
+    // TypeOrmModule.forFeature([
+    //   Confirm
+    // ]),
     UserModule,
     CompanyModule,
     JwtModule.register({}),

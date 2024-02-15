@@ -114,4 +114,8 @@ export class InfoTracerService {
 
     return true;
   }
+
+  async deleteAllDev() {
+
+  }
 }

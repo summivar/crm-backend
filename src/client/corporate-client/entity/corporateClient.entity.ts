@@ -51,6 +51,6 @@ export class CorporateClient {
   @JoinColumn({name: 'companyId'})
   company: Company;
 
-  @OneToMany(() => Order, order => order.corporateClient)
+  @OneToMany(() => Order, order => order.corporateClient, { cascade: true })
   orders: Order[];
 }

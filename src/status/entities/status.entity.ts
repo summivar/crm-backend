@@ -25,7 +25,7 @@ export class Status extends AbstractEntity<Status> {
   })
   updatedAt: Date;
 
-  @OneToMany(() => Order, order => order.status)
+  @OneToMany(() => Order, order => order.status, { cascade: true })
   orders: Order[];
 
   @ManyToOne(() => Company, company => company.statuses)

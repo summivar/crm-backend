@@ -11,10 +11,10 @@ export class InfoTracer extends AbstractEntity<InfoTracer> {
   })
   name: string;
 
-  @OneToMany(() => IndividualClient, (individualClient) => individualClient.infoTracer)
+  @OneToMany(() => IndividualClient, (individualClient) => individualClient.infoTracer, { cascade: true })
   individualClients: IndividualClient[];
 
-  @OneToMany(() => CorporateClient, (CorporateClient) => CorporateClient.infoTracer)
+  @OneToMany(() => CorporateClient, (CorporateClient) => CorporateClient.infoTracer, { cascade: true })
   corporateClients: CorporateClient[];
 
   @ManyToOne(() => Company, company => company.infoTracers)

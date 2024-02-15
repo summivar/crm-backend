@@ -1,5 +1,5 @@
 import {
-  BeforeInsert, BeforeUpdate,
+  BeforeInsert,
   Column, CreateDateColumn,
   Entity,
   JoinColumn,
@@ -12,7 +12,7 @@ import { Role } from '../../auth/enums';
 import { Order } from '../../order/entities/order.entity';
 import * as argon from 'argon2';
 import { AbstractEntity } from '../../common/entity/abstract.entity';
-import { Exclude } from 'class-transformer';
+// import { Confirm } from '../../auth/entities/confirm.entity';
 
 @Entity()
 export class User extends AbstractEntity<User> {
@@ -76,11 +76,14 @@ export class User extends AbstractEntity<User> {
   @JoinColumn({name: 'companyId'})
   company: Company;
 
-  @OneToMany(() => Order, order => order.user)
+  @OneToMany(() => Order, order => order.user, { cascade: true })
   createdOrders: Order[];
 
   @ManyToMany(() => Order, order => order.stuff)
   assignedOrders: Order[];
+
+  // @OneToMany(() => Confirm, confirm => confirm.user)
+  // confirm: Confirm;
 
   @BeforeInsert()
   async hashPassword() {

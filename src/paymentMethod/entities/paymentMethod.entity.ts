@@ -24,6 +24,6 @@ export class PaymentMethod extends AbstractEntity<PaymentMethod> {
   @JoinColumn({ name: 'companyId' })
   company: Company;
 
-  @OneToMany(() => Order, order => order.paymentMethod)
+  @OneToMany(() => Order, order => order.paymentMethod, { cascade: true })
   orders: Order[];
 }

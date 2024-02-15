@@ -33,28 +33,28 @@ export class Company extends AbstractEntity<Company> {
   })
   signUpDriverString: string;
 
-  @OneToMany(() => InfoTracer, infoTracer => infoTracer.company)
+  @OneToMany(() => InfoTracer, infoTracer => infoTracer.company, { cascade: true })
   infoTracers: InfoTracer[];
 
-  @OneToMany(() => Status, status => status.company)
+  @OneToMany(() => Status, status => status.company, { cascade: true })
   statuses: Status[];
 
-  @OneToMany(() => PaymentMethod, paymentMethod => paymentMethod.company)
+  @OneToMany(() => PaymentMethod, paymentMethod => paymentMethod.company, { cascade: true })
   paymentMethods: PaymentMethod[];
 
-  @OneToMany(() => User, user => user.company)
+  @OneToMany(() => User, user => user.company, { cascade: true })
   users: User[];
 
-  @OneToMany(() => CorporateClient, corporateClient => corporateClient.company)
+  @OneToMany(() => CorporateClient, corporateClient => corporateClient.company, { cascade: true })
   corporateClients: CorporateClient[];
 
-  @OneToMany(() => IndividualClient, individualClient => individualClient.company)
+  @OneToMany(() => IndividualClient, individualClient => individualClient.company, { cascade: true })
   individualClients: IndividualClient[];
 
-  @OneToMany(() => Solution, solution => solution.company)
+  @OneToMany(() => Solution, solution => solution.company, { cascade: true })
   solutions: Solution[];
 
-  @OneToMany(() => Order, order => order.company)
+  @OneToMany(() => Order, order => order.company, { cascade: true })
   orders: Order[];
 
   @CreateDateColumn({

@@ -7,6 +7,7 @@ export const EXCEPTION_MESSAGE = {
     SOMETHING_GO_WRONG: 'Something go wrong',
     NO_PHOTOS: 'No photos in request',
     DISTRICT_NO_EXISTS: 'District do not exists',
+    CONFIRM_CODE_WRONG: 'Confirm code is wrong',
   },
   UNAUTHORIZED_EXCEPTION: {
     INVALID_CREDENTIALS: 'Invalid credentials',
