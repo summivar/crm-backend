@@ -2,7 +2,7 @@ import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/com
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import { EditUserDto, RoleUserDto } from './dtos';
+import { EditUserDto, GetUserFilterDto, RoleUserDto } from './dtos';
 import { EXCEPTION_MESSAGE, FILENAME } from '../constants';
 import { FileSystemService } from '../common/file-system/file-system.service';
 import { CompanyService } from '../company/company.service';
@@ -13,8 +13,21 @@ export class UserService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
     private readonly fileService: FileSystemService,
-    private readonly companyService: CompanyService,
   ) {
+  }
+
+  async getFiltered(dto: GetUserFilterDto, companyId: number) {
+    const {role} = dto;
+
+    let query = this.userRepository.createQueryBuilder('user')
+      .leftJoinAndSelect('user.company', 'company')
+      .where('company.id = :companyId', {companyId: Number(companyId)});
+
+    if (role) {
+      query = query.andWhere('user.role = :role', {role});
+    }
+
+    return query.getManyAndCount();
   }
 
   async save(user: Partial<User>) {

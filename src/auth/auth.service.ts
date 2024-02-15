@@ -105,7 +105,6 @@ export class AuthService {
     } catch (e) {
       throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND);
     }
-    const roleEnum: Role = Role[data?.role as keyof typeof Role];
 
     const company = await this.companyService.getCompanyById(data?.id);
     if (!company) {
@@ -120,7 +119,7 @@ export class AuthService {
       phone: dto.phone,
       password: dto.password,
       refreshToken: tokens.refreshToken,
-      role: roleEnum,
+      role: data.role,
       company: company
     });
 

@@ -4,7 +4,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
-  Put, Req,
+  Put, Query, Req,
   UploadedFile,
   UseGuards,
   UseInterceptors
@@ -15,7 +15,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { FILE_LIMIT } from '../constants';
 import { extname } from 'path';
 import { ValidationException } from '../exceptions';
-import { EditUserDto, RoleUserDto } from './dtos';
+import { EditUserDto, GetUserFilterDto, RoleUserDto } from './dtos';
 import { JwtGuard, RolesGuard } from '../auth/guards';
 import { UserRequest } from '../auth/types';
 import { Roles } from '../auth/decorators';
@@ -25,6 +25,18 @@ import { Role } from '../auth/enums';
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {
+  }
+
+  @ApiOperation({summary: 'Получить пользователей по фильтрам'})
+  @ApiBearerAuth('JWT-auth')
+  @Roles(Role.ADMIN, Role.MANAGER)
+  @UseGuards(RolesGuard)
+  @Get('get')
+  async get(
+    @Req() req: UserRequest,
+    @Query() filterDto: GetUserFilterDto
+  ) {
+    return this.userService.getFiltered(filterDto, req.user.company);
   }
 
   @ApiOperation({summary: 'Получить всех пользователей'})
