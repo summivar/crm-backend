@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Param,
-  Post,
-  Req,
-  Res,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, HttpStatus, Param, Post, Req, Res, UseGuards, } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { SignInDto, SignUpStuffDto, SignUpSuperManagerDto } from './dtos';
@@ -14,6 +6,9 @@ import { COOKIE_EXPIRES, COOKIE_KEY } from '../constants';
 import { SignUpResponse, UserRequest } from './types';
 import { Request, Response } from 'express';
 import { JwtGuard } from './guards';
+import { ApiErrorDecorator } from '../common/decorator/error';
+import { EXCEPTION } from './exceptions';
+import { ErrorEnum } from '../exceptions';
 
 @ApiTags('Авторизация')
 @Controller('auth')
@@ -22,6 +17,8 @@ export class AuthController {
   }
 
   @ApiOperation({summary: 'Регистрация пользователя и новой компании'})
+  @ApiErrorDecorator(EXCEPTION.ALREADY_EXISTS, ErrorEnum.BAD_REQUEST, HttpStatus.BAD_REQUEST)
+  @ApiErrorDecorator(EXCEPTION.ALREADY_EXISTS, ErrorEnum.BAD_REQUEST, HttpStatus.BAD_REQUEST)
   @Post('signup')
   async signup(
     @Body() signupDto: SignUpSuperManagerDto,
@@ -124,18 +121,21 @@ export class AuthController {
   @Post('refresh')
   async refreshTokens(
     @Req() request: Request,
-    @Res({passthrough: true}) response: Response
+    @Res({passthrough: true}) res: Response
   ) {
     const refreshToken = request.cookies[COOKIE_KEY.REFRESH_TOKEN];
-    const tokens = await this.authService.refreshTokens(refreshToken);
+    const response = await this.authService.refreshTokens(refreshToken);
     const expirationTime = new Date();
     expirationTime.setSeconds(expirationTime.getSeconds() + COOKIE_EXPIRES.REFRESH_TOKEN);
-    response.cookie(COOKIE_KEY.REFRESH_TOKEN, tokens.refreshToken, {
+    res.cookie(COOKIE_KEY.REFRESH_TOKEN, response.tokens.refreshToken, {
       httpOnly: true,
       expires: expirationTime,
     });
 
-    return tokens.accessToken;
+    return {
+      accessToken: response.tokens.accessToken,
+      user: response.user
+    };
   }
 
 }

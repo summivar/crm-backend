@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { SignInDto, SignUpStuffDto, SignUpSuperManagerDto } from './dtos';
 import { User } from '../user/entities/user.entity';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager } from 'typeorm';
 import { Company } from '../company/entities/company.entity';
 import { Role } from './enums';
 import { UserService } from '../user/user.service';
@@ -12,7 +12,8 @@ import { ConfigService } from '@nestjs/config';
 import { Tokens } from './types';
 import { CompanyService } from '../company/company.service';
 import { CryptService } from 'src/common/crypt/crypt.service';
-import { InjectRepository } from '@nestjs/typeorm';
+import { EXCEPTION } from './exceptions';
+
 // import { Confirm } from './entities/confirm.entity';
 
 @Injectable()
@@ -29,7 +30,7 @@ export class AuthService {
 
   async sendCode() {
     const code = this.getCode();
-    
+
   }
 
   // async confirmCode(writtenCode: string, encryptedString: string) {
@@ -55,7 +56,7 @@ export class AuthService {
   async signupWithCompany(dto: SignUpSuperManagerDto) {
     const candidate = await this.userService.getUserByPhone(dto.phone);
     if (candidate) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.ALREADY_EXISTS);
+      throw new BadRequestException(EXCEPTION.ALREADY_EXISTS);
     }
 
     const tokens = await this.getToken(dto.phone);
@@ -189,7 +190,14 @@ export class AuthService {
     const tokens = await this.getToken(user.phone);
     await this.userService.updateRefreshToken(user.phone, tokens.refreshToken);
 
-    return tokens;
+    return {
+      tokens,
+      user: {
+        id: user.id,
+        name: user.name,
+        role: user.role
+      }
+    };
   }
 
 
