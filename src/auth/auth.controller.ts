@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Param,
-  ParseEnumPipe,
   Post,
   Req,
   Res,
@@ -15,7 +14,6 @@ import { COOKIE_EXPIRES, COOKIE_KEY } from '../constants';
 import { SignUpResponse, UserRequest } from './types';
 import { Request, Response } from 'express';
 import { JwtGuard } from './guards';
-import { Role, Worker } from './enums';
 
 @ApiTags('Авторизация')
 @Controller('auth')

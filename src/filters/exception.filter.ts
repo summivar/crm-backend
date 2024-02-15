@@ -22,14 +22,14 @@ export class CustomExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     let statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
 
-    let errorMessage = 'Something went wrong with the server';
+    let errorMessage = 'Что-то пошло не так';
 
     let errorData = null;
 
     if (exception instanceof ValidationException) {
       statusCode = exception.getStatus();
       const {errors} = exception.getResponse() as any;
-      errorMessage = 'Validation Error';
+      errorMessage = 'Ошибка валидации';
       errorData = errors || null;
     } else if (process.env['NODE_ENV'] !== 'production') {
       if (exception instanceof HttpException) {
@@ -38,18 +38,6 @@ export class CustomExceptionFilter implements ExceptionFilter {
       } else {
         errorData = exception;
       }
-    }
-
-    if (exception.toString().includes('null value')) {
-      const column = exception.toString().match(/column "(.*?)"/)[1];
-      const relation = exception.toString().match(/relation "(.*?)"/)[1];
-      errorMessage = `${column} is required in ${relation}`;
-    }
-
-    if (exception.toString().includes('already exists')) {
-      const fieldName = exception.toString().match(/Key \((.*?)\)=/)[1];
-      const fieldValue = exception.toString().match(/\)=(.*?) /)[1].replace(/^\((.*)\)$/, '$1');
-      errorMessage = `Key '${fieldName}' must be unique. Value '${fieldValue}' is already exists'`
     }
 
     if (
@@ -62,7 +50,6 @@ export class CustomExceptionFilter implements ExceptionFilter {
       errorData = null;
     }
 
-    // Handle and customize the error response
     response.status(statusCode).json({
       statusCode,
       message: errorMessage,

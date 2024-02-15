@@ -5,7 +5,7 @@ export class ValidationException extends HttpException {
     super(
       {
         statusCode: HttpStatus.BAD_REQUEST,
-        message: 'Validation error',
+        message: 'Ошибка валидации',
         errors,
       },
       HttpStatus.BAD_REQUEST

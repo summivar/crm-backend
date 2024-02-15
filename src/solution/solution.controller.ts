@@ -1,10 +1,10 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put, Query, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { SolutionService } from './solution.service';
 import { RolesGuard } from '../auth/guards';
 import { Roles } from '../auth/decorators';
 import { Role } from '../auth/enums';
-import { CreateSolutionDto, EditSolutionDto } from './dtos';
+import { CreateSolutionDto, EditSolutionDto, GetSolutionFilterDto } from './dtos';
 import { UserRequest } from '../auth/types';
 
 @ApiTags('Услуги')
@@ -13,6 +13,18 @@ export class SolutionController {
   constructor(
     private readonly solutionService: SolutionService
   ) {
+  }
+
+  @ApiOperation({summary: 'Получение услуг по фильтрам'})
+  @ApiBearerAuth('JWT-auth')
+  @Roles(Role.ADMIN, Role.MANAGER)
+  @UseGuards(RolesGuard)
+  @Get('get')
+  async getFiltered(
+    @Req() req: UserRequest,
+    @Query() filterDto: GetSolutionFilterDto,
+  ) {
+
   }
 
   @ApiOperation({summary: 'Получение услуги по ID'})

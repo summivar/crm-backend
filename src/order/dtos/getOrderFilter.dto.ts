@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDateString, IsEnum, IsNumber, IsNumberString, IsOptional, IsString } from 'class-validator';
+import { IsDateString, IsEnum, IsNumberString, IsOptional, IsString } from 'class-validator';
 import { Client as ClientEnum } from '../../client/enums';
 
-export class GetOrdersFilterDto {
+export class GetOrderFilterDto {
   @ApiProperty({required: false })
   @IsString()
   @IsEnum(ClientEnum)

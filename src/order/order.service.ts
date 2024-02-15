@@ -13,7 +13,7 @@ import { IndividualClientService } from '../client/individual-client/individual-
 import { CorporateClientService } from '../client/corporate-client/corporate-client.service';
 import { IndividualClient } from '../client/individual-client/entity/individualClient.entity';
 import { CorporateClient } from '../client/corporate-client/entity/corporateClient.entity';
-import { GetOrdersFilterDto } from './dtos/getOrderFilter.dto';
+import { GetOrderFilterDto } from './dtos/getOrderFilter.dto';
 
 @Injectable()
 export class OrderService {
@@ -30,7 +30,7 @@ export class OrderService {
   ) {
   }
 
-  async getFiltered(dto: GetOrdersFilterDto, companyId: number) {
+  async getFiltered(dto: GetOrderFilterDto, companyId: number) {
     const {
       statusId,
       managerId,

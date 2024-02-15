@@ -32,7 +32,7 @@ export class UserController {
   @Roles(Role.ADMIN, Role.MANAGER)
   @UseGuards(RolesGuard)
   @Get('get')
-  async get(
+  async getFiltered(
     @Req() req: UserRequest,
     @Query() filterDto: GetUserFilterDto
   ) {

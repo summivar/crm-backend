@@ -6,7 +6,7 @@ import { Roles } from '../auth/decorators';
 import { Role } from '../auth/enums';
 import { RolesGuard } from '../auth/guards';
 import { CreateOrderDto, EditOrderDto } from './dtos';
-import { GetOrdersFilterDto } from './dtos/getOrderFilter.dto';
+import { GetOrderFilterDto } from './dtos/getOrderFilter.dto';
 
 @ApiTags('Заказы')
 @Controller('order')
@@ -21,7 +21,7 @@ export class OrderController {
   @Get('get')
   async getFiltered(
     @Req() req: UserRequest,
-    @Query() filterDto: GetOrdersFilterDto,
+    @Query() filterDto: GetOrderFilterDto,
   ) {
     return this.orderService.getFiltered(filterDto, req.user.company);
   }
