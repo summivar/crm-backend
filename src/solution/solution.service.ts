@@ -5,6 +5,7 @@ import { CreateSolutionDto, EditSolutionDto } from './dtos';
 import { CompanyService } from '../company/company.service';
 import { EXCEPTION_MESSAGE } from '../constants';
 import { Solution } from './entities/solution.entity';
+import { CompanyNotFoundException, SolutionAlreadyExistException, SolutionNotFoundException } from './exceptions';
 
 @Injectable()
 export class SolutionService {
@@ -36,12 +37,12 @@ export class SolutionService {
   async create(dto: CreateSolutionDto, companyId: number) {
     const company = await this.companyService.getCompanyWithEntity(companyId, 'solution');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('company'));
+      throw new CompanyNotFoundException();
     }
 
     const existingSolution = company.solutions.find(solution => solution.name === dto.name);
     if (existingSolution) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.ALREADY_EXISTS);
+      throw new SolutionAlreadyExistException();
     }
 
     const solution = await this.solutionRepository.save({
@@ -62,7 +63,7 @@ export class SolutionService {
   async edit(dto: EditSolutionDto, solutionId: number, companyId: number) {
     const company = await this.companyService.getCompanyWithEntityId(companyId, solutionId, 'solution');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('company'));
+      throw new CompanyNotFoundException();
     }
 
     const solution = await this.solutionRepository.findOne({
@@ -72,13 +73,13 @@ export class SolutionService {
     });
 
     if (!solution) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('solution'));
+      throw new SolutionNotFoundException();
     }
 
     if (dto.name) {
       const existingSolution = company.solutions.find(solution => solution.name === dto.name);
       if (existingSolution) {
-        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.ALREADY_EXISTS);
+        throw new SolutionAlreadyExistException();
       }
 
       solution.name = dto.name;
@@ -106,12 +107,12 @@ export class SolutionService {
   async deleteById(companyId: number, solutionId: number) {
     const company = await this.companyService.getCompanyWithEntityId(companyId, solutionId, 'solution');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND);
+      throw new CompanyNotFoundException();
     }
 
     const solution = company.solutions.find(solution => solution.id === solutionId);
     if (!solution) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('solution'));
+      throw new SolutionNotFoundException();
     }
 
     await this.solutionRepository.remove(solution as any);
@@ -122,7 +123,7 @@ export class SolutionService {
   async deleteAll(companyId: number) {
     const company = await this.companyService.getCompanyWithEntity(companyId, 'solution');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND);
+      throw new CompanyNotFoundException();
     }
 
     company.solutions = [];

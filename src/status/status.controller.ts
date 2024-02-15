@@ -6,6 +6,9 @@ import { Roles } from '../auth/decorators';
 import { Role } from '../auth/enums';
 import { CreateStatusDto, EditStatusDto } from './dtos';
 import { UserRequest } from '../auth/types';
+import { ApiException } from '@nanogiants/nestjs-swagger-api-exception-decorator';
+import { ForbiddenException, UnauthorizedException } from '../auth/exceptions';
+import { CompanyNotFoundException, StatusAlreadyExistException, StatusNotFoundException } from './exceptions';
 
 @ApiTags('Статусы')
 @Controller('status')
@@ -16,6 +19,7 @@ export class StatusController {
   }
 
   @ApiOperation({summary: 'Получение статуса по ID'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException])
   @ApiParam({
     name: 'id',
     required: true,
@@ -34,6 +38,7 @@ export class StatusController {
   }
 
   @ApiOperation({summary: 'Получение всех статусов'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException])
   @ApiBearerAuth('JWT-auth')
   @Roles(Role.ADMIN, Role.MANAGER, Role.CLEANER, Role.DRIVER)
   @UseGuards(RolesGuard)
@@ -45,6 +50,7 @@ export class StatusController {
   }
 
   @ApiOperation({summary: 'Создание статуса'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException, CompanyNotFoundException, StatusAlreadyExistException])
   @ApiBearerAuth('JWT-auth')
   @Roles(Role.ADMIN, Role.MANAGER)
   @UseGuards(RolesGuard)
@@ -57,6 +63,7 @@ export class StatusController {
   }
 
   @ApiOperation({summary: 'Изменение статуса'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException, CompanyNotFoundException, StatusAlreadyExistException, StatusNotFoundException])
   @ApiParam({
     name: 'id',
     required: true,
@@ -76,6 +83,7 @@ export class StatusController {
   }
 
   @ApiOperation({summary: 'Удаление статуса по ID'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException, CompanyNotFoundException, StatusNotFoundException])
   @ApiParam({
     name: 'id',
     required: true,
@@ -94,6 +102,7 @@ export class StatusController {
   }
 
   @ApiOperation({summary: 'Удаление всех статусов'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException, CompanyNotFoundException])
   @ApiBearerAuth('JWT-auth')
   @Roles(Role.ADMIN, Role.MANAGER)
   @UseGuards(RolesGuard)

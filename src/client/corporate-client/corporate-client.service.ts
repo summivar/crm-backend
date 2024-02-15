@@ -7,6 +7,11 @@ import { CompanyService } from '../../company/company.service';
 import { EXCEPTION_MESSAGE } from '../../constants';
 import { EditPaymentMethodDto } from '../../paymentMethod/dtos';
 import { InfoTracerService } from '../../infoTracer/infoTracer.service';
+import {
+  CompanyNotFoundException,
+  CorporateClientAlreadyExistException, CorporateClientNotFoundException,
+  InfoTracerNotFoundException
+} from './exceptions';
 
 @Injectable()
 export class CorporateClientService {
@@ -28,14 +33,14 @@ export class CorporateClientService {
 
     let query = this.corporateClientRepository.createQueryBuilder('corporateClient')
       .leftJoinAndSelect('corporateClient.company', 'company')
-      .where('company.id = :companyId', { companyId: Number(companyId) });
+      .where('company.id = :companyId', {companyId: Number(companyId)});
 
     if (dateFrom) {
-      query = query.andWhere('corporateClient.dateOfCreation >= :dateFrom', { dateFrom });
+      query = query.andWhere('corporateClient.dateOfCreation >= :dateFrom', {dateFrom});
     }
 
     if (dateTo) {
-      query = query.andWhere('corporateClient.dateOfCreation <= :dateTo', { dateTo });
+      query = query.andWhere('corporateClient.dateOfCreation <= :dateTo', {dateTo});
     }
 
     if (someAddresses === 'true') {
@@ -48,7 +53,7 @@ export class CorporateClientService {
 
     query = query.leftJoinAndSelect('corporateClient.infoTracer', 'infoTracer');
     if (infoTracerId) {
-      query = query.andWhere('infoTracer.id = :infoTracerId', { infoTracerId: Number(infoTracerId) });
+      query = query.andWhere('infoTracer.id = :infoTracerId', {infoTracerId: Number(infoTracerId)});
     }
 
     return await query.getManyAndCount();
@@ -74,16 +79,28 @@ export class CorporateClientService {
   }
 
   async create(dto: CreateCorporateClientDto, companyId: number) {
+    const client = await this.corporateClientRepository.findOne({
+      where: [
+        { phone: dto.phone },
+        { INN: dto.INN },
+        { KPP: dto.KPP }
+      ]
+    });
+
+    if (client) {
+      throw new CorporateClientAlreadyExistException();
+    }
+
     const company = await this.companyService.getCompanyWithEntity(companyId, 'corporateClient');
 
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('company'));
+      throw new CompanyNotFoundException()
     }
 
     const infoTracer = await this.infoTracerService.getById(dto.infoTracerId, companyId);
 
     if (!infoTracer) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('infoTracer'));
+      throw new InfoTracerNotFoundException();
     }
 
     const newClient = await this.corporateClientRepository.save({
@@ -106,7 +123,7 @@ export class CorporateClientService {
   async edit(dto: EditCorporateClientDto, corporateClientId: number, companyId: number) {
     const company = await this.companyService.getCompanyWithEntityId(companyId, corporateClientId, 'corporateClient');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('company'));
+      throw new CompanyNotFoundException()
     }
 
     const corporateClient = await this.corporateClientRepository.findOne({
@@ -116,7 +133,7 @@ export class CorporateClientService {
     });
 
     if (!corporateClient) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('corporateClient'));
+      throw new CorporateClientNotFoundException();
     }
 
     if (dto.phone) {
@@ -147,7 +164,7 @@ export class CorporateClientService {
       const infoTracer = await this.infoTracerService.getById(dto.infoTracerId, companyId);
 
       if (!infoTracer) {
-        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('infoTracer'));
+        throw new InfoTracerNotFoundException();
       }
 
       corporateClient.infoTracer = infoTracer;
@@ -159,12 +176,12 @@ export class CorporateClientService {
   async deleteById(companyId: number, corporateClientId: number) {
     const company = await this.companyService.getCompanyWithEntityId(companyId, corporateClientId, 'corporateClient');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND);
+      throw new CompanyNotFoundException();
     }
 
     const corporateClient = company.corporateClients.find(corporateClient => corporateClient.id === corporateClientId);
     if (!corporateClient) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('corporateClient'));
+      throw new CorporateClientNotFoundException();
     }
 
     await this.corporateClientRepository.remove(corporateClient as any);
@@ -175,7 +192,7 @@ export class CorporateClientService {
   async deleteAll(companyId: number) {
     const company = await this.companyService.getCompanyWithEntity(companyId, 'corporateClient');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND);
+      throw new CompanyNotFoundException();
     }
 
     company.corporateClients = [];

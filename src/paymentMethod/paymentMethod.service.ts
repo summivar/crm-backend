@@ -5,6 +5,11 @@ import { CreatePaymentMethodDto, EditPaymentMethodDto } from './dtos';
 import { CompanyService } from '../company/company.service';
 import { EXCEPTION_MESSAGE } from '../constants';
 import { PaymentMethod } from './entities/paymentMethod.entity';
+import {
+  CompanyNotFoundException,
+  PaymentMethodAlreadyExistException,
+  PaymentMethodNotFoundException
+} from './exceptions';
 
 @Injectable()
 export class PaymentMethodService {
@@ -35,12 +40,12 @@ export class PaymentMethodService {
   async create(dto: CreatePaymentMethodDto, companyId: number) {
     const company = await this.companyService.getCompanyWithEntity(companyId, 'paymentMethod');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('company'));
+      throw new CompanyNotFoundException();
     }
 
     const existingPaymentMethod = company.paymentMethods.find(paymentMethod => paymentMethod.name === dto.name);
     if (existingPaymentMethod) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.ALREADY_EXISTS);
+      throw new PaymentMethodAlreadyExistException();
     }
 
     const paymentMethod = await this.paymentMethodRepository.save({
@@ -57,7 +62,7 @@ export class PaymentMethodService {
   async edit(dto: EditPaymentMethodDto, paymentMethodId: number, companyId: number) {
     const company = await this.companyService.getCompanyWithEntityId(companyId, paymentMethodId, 'paymentMethod');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('company'));
+      throw new CompanyNotFoundException();
     }
 
     const paymentMethod = await this.paymentMethodRepository.findOne({
@@ -67,13 +72,13 @@ export class PaymentMethodService {
     });
 
     if (!paymentMethod) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('paymentMethod'));
+      throw new PaymentMethodNotFoundException();
     }
 
     if (dto.name) {
       const existingPaymentMethod = company.paymentMethods.find(paymentMethod => paymentMethod.name === dto.name);
       if (existingPaymentMethod) {
-        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.ALREADY_EXISTS);
+        throw new PaymentMethodNotFoundException();
       }
 
       paymentMethod.name = dto.name;
@@ -85,12 +90,12 @@ export class PaymentMethodService {
   async deleteById(companyId: number, paymentMethodId: number) {
     const company = await this.companyService.getCompanyWithEntityId(companyId, paymentMethodId, 'paymentMethod');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND);
+      throw new CompanyNotFoundException();
     }
 
     const paymentMethod = company.paymentMethods.find(paymentMethod => paymentMethod.id === paymentMethodId);
     if (!paymentMethod) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('paymentMethod'));
+      throw new PaymentMethodNotFoundException();
     }
 
     await this.paymentMethodRepository.remove(paymentMethod as any);
@@ -101,7 +106,7 @@ export class PaymentMethodService {
   async deleteAll(companyId: number) {
     const company = await this.companyService.getCompanyWithEntity(companyId, 'paymentMethod');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND);
+      throw new CompanyNotFoundException();
     }
 
     company.paymentMethods = [];

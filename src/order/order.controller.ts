@@ -7,6 +7,18 @@ import { Role } from '../auth/enums';
 import { RolesGuard } from '../auth/guards';
 import { CreateOrderDto, EditOrderDto } from './dtos';
 import { GetOrderFilterDto } from './dtos/getOrderFilter.dto';
+import { ApiException } from '@nanogiants/nestjs-swagger-api-exception-decorator';
+import { ForbiddenException, UnauthorizedException } from '../auth/exceptions';
+import {
+  ClientNotFoundException,
+  CompanyNotFoundException, OrderNotFoundException,
+  PaymentMethodNotFoundException,
+  SolutionNotFoundException,
+  SolutionsNotFoundException,
+  StatusNotFoundException,
+  StuffNotFoundException, StuffsNotFoundException,
+  UserNotFoundException
+} from './exceptions';
 
 @ApiTags('Заказы')
 @Controller('order')
@@ -15,6 +27,7 @@ export class OrderController {
   }
 
   @ApiOperation({ summary: 'Получение заказов по фильтрам' })
+  @ApiException(() => [UnauthorizedException, ForbiddenException])
   @ApiBearerAuth('JWT-auth')
   @Roles(Role.ADMIN, Role.MANAGER)
   @UseGuards(RolesGuard)
@@ -27,6 +40,7 @@ export class OrderController {
   }
 
   @ApiOperation({ summary: 'Получение заказа по ID' })
+  @ApiException(() => [UnauthorizedException, ForbiddenException])
   @ApiParam({
     name: 'id',
     required: true,
@@ -45,6 +59,7 @@ export class OrderController {
   }
 
   @ApiOperation({ summary: 'Получение всех заказов' })
+  @ApiException(() => [UnauthorizedException, ForbiddenException])
   @ApiBearerAuth('JWT-auth')
   @Roles(Role.ADMIN, Role.MANAGER)
   @UseGuards(RolesGuard)
@@ -56,6 +71,7 @@ export class OrderController {
   }
 
   @ApiOperation({ summary: 'Создание заказа' })
+  @ApiException(() => [UnauthorizedException, ForbiddenException, CompanyNotFoundException, ClientNotFoundException, UserNotFoundException, PaymentMethodNotFoundException, StatusNotFoundException, SolutionNotFoundException, SolutionsNotFoundException, StuffNotFoundException, StuffsNotFoundException])
   @ApiBearerAuth('JWT-auth')
   @Roles(Role.ADMIN, Role.MANAGER)
   @UseGuards(RolesGuard)
@@ -68,6 +84,7 @@ export class OrderController {
   }
 
   @ApiOperation({ summary: 'Изменение заказа' })
+  @ApiException(() => [UnauthorizedException, ForbiddenException, OrderNotFoundException, CompanyNotFoundException, ClientNotFoundException, UserNotFoundException, PaymentMethodNotFoundException, StatusNotFoundException, SolutionNotFoundException, SolutionsNotFoundException, StuffNotFoundException, StuffsNotFoundException])
   @ApiParam({
     name: 'id',
     required: true,
@@ -87,6 +104,7 @@ export class OrderController {
   }
 
   @ApiOperation({ summary: 'Удаление заказа по ID' })
+  @ApiException(() => [UnauthorizedException, ForbiddenException, CompanyNotFoundException, OrderNotFoundException])
   @ApiParam({
     name: 'id',
     required: true,
@@ -105,6 +123,7 @@ export class OrderController {
   }
 
   @ApiOperation({ summary: 'Удаление всех заказов' })
+  @ApiException(() => [UnauthorizedException, ForbiddenException, CompanyNotFoundException])
   @ApiBearerAuth('JWT-auth')
   @Roles(Role.ADMIN)
   @UseGuards(RolesGuard)

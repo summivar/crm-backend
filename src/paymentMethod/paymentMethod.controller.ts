@@ -6,6 +6,13 @@ import { Roles } from '../auth/decorators';
 import { Role } from '../auth/enums';
 import { CreatePaymentMethodDto, EditPaymentMethodDto } from './dtos';
 import { UserRequest } from '../auth/types';
+import { ApiException } from '@nanogiants/nestjs-swagger-api-exception-decorator';
+import { ForbiddenException, UnauthorizedException } from '../auth/exceptions';
+import {
+  CompanyNotFoundException,
+  PaymentMethodAlreadyExistException,
+  PaymentMethodNotFoundException
+} from './exceptions';
 
 @ApiTags('Платёжные методы')
 @Controller('paymentMethod')
@@ -16,6 +23,7 @@ export class PaymentMethodController {
   }
 
   @ApiOperation({summary: 'Получение платёжного метода по ID'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException])
   @ApiParam({
     name: 'id',
     required: true,
@@ -34,6 +42,7 @@ export class PaymentMethodController {
   }
 
   @ApiOperation({summary: 'Получение всех платёжных методов'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException])
   @ApiBearerAuth('JWT-auth')
   @Roles(Role.ADMIN, Role.MANAGER, Role.CLEANER, Role.DRIVER)
   @UseGuards(RolesGuard)
@@ -45,6 +54,7 @@ export class PaymentMethodController {
   }
 
   @ApiOperation({summary: 'Создание платёжного метода'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException, CompanyNotFoundException, PaymentMethodAlreadyExistException])
   @ApiBearerAuth('JWT-auth')
   @Roles(Role.ADMIN, Role.MANAGER)
   @UseGuards(RolesGuard)
@@ -57,6 +67,7 @@ export class PaymentMethodController {
   }
 
   @ApiOperation({summary: 'Изменение платёжного метода'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException, CompanyNotFoundException, PaymentMethodAlreadyExistException, PaymentMethodNotFoundException])
   @ApiParam({
     name: 'id',
     required: true,
@@ -76,6 +87,7 @@ export class PaymentMethodController {
   }
 
   @ApiOperation({summary: 'Удаление платёжного метода по ID'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException, CompanyNotFoundException, PaymentMethodNotFoundException])
   @ApiParam({
     name: 'id',
     required: true,
@@ -94,6 +106,7 @@ export class PaymentMethodController {
   }
 
   @ApiOperation({summary: 'Удаление всех платёжных методов'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException, CompanyNotFoundException])
   @ApiBearerAuth('JWT-auth')
   @Roles(Role.ADMIN, Role.MANAGER)
   @UseGuards(RolesGuard)

@@ -1,12 +1,14 @@
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { EditUserDto, GetUserFilterDto, RoleUserDto } from './dtos';
 import { EXCEPTION_MESSAGE, FILENAME } from '../constants';
 import { FileSystemService } from '../common/file-system/file-system.service';
-import { CompanyService } from '../company/company.service';
 import * as argon from 'argon2';
+import { Role } from '../auth/enums';
+import { ForbiddenException } from '../auth/exceptions';
+import { FromUserNotFoundException, UserNotFoundException } from './exceptions';
 
 @Injectable()
 export class UserService {
@@ -71,52 +73,90 @@ export class UserService {
     });
   }
 
-  async edit(dto: EditUserDto, userId: number, fromId: number, photo: Express.Multer.File) {
-    const user = await this.userRepository.findOneBy({id: userId});
-    if (!user) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('user'));
-    }
-
-    if (userId !== fromId) {
-      throw new ForbiddenException(EXCEPTION_MESSAGE.FORBIDDEN_EXCEPTION.NO_RULES_TO_GET);
-    }
-
-    if (dto.name) {
-      user.name = dto.name;
-    }
-
-    if (dto.surname) {
-      user.surname = dto.surname;
-    }
-
-    if (dto.middleName) {
-      user.middleName = dto.middleName;
-    }
-
-    if (dto.phone) {
-      const candidate = await this.getUserByPhone(dto.phone);
-      if (candidate) {
-        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.INVALID_DATA);
-      }
-      user.phone = dto.phone;
-    }
-
-    if (dto.password) {
-      user.password = await argon.hash(dto.password);
-    }
-
-    if (photo?.buffer) {
-      if (user.photoPath !== FILENAME.DEFAULT_IMG) {
-        this.fileService.deleteFile(user.photoPath);
-      }
-
-      user.photoPath = this.fileService.saveFile(photo);
-    }
-
-    const newUser = await this.userRepository.save(user);
-    const {password, refreshToken, ...userData} = newUser;
-    return userData;
-  }
+  // async edit(dto: EditUserDto, userId: number, fromId: number, photo: Express.Multer.File) {
+  //   const user = await this.userRepository.findOne({
+  //     where: {
+  //       id: userId
+  //     },
+  //     relations: {
+  //       company: true
+  //     }
+  //   });
+  //
+  //   if (!user) {
+  //     throw new UserNotFoundException();
+  //   }
+  //
+  //   const editByUser = await this.userRepository.findOne({
+  //     where: {
+  //       id: fromId,
+  //     },
+  //     relations: {
+  //       company: true
+  //     }
+  //   });
+  //
+  //   if (!editByUser) {
+  //     throw new FromUserNotFoundException();
+  //   }
+  //
+  //   let isForbidden = true;
+  //
+  //   if (userId !== fromId) {
+  //     if (user.company.id === editByUser.company.id) {
+  //       if (editByUser.role === Role.ADMIN || editByUser.role === Role.MANAGER) {
+  //         if (user.role !== Role.ADMIN) {
+  //           isForbidden = false;
+  //         }
+  //         throw new ForbiddenException();
+  //       }
+  //       throw new ForbiddenException();
+  //     }
+  //     throw new ForbiddenException();
+  //   } else {
+  //     isForbidden = false;
+  //   }
+  //
+  //   if (isForbidden) {
+  //     throw new ForbiddenException();
+  //   }
+  //
+  //   if (dto.name) {
+  //     user.name = dto.name;
+  //   }
+  //
+  //   if (dto.surname) {
+  //     user.surname = dto.surname;
+  //   }
+  //
+  //   if (dto.middleName) {
+  //     user.middleName = dto.middleName;
+  //   }
+  //
+  //   if (dto.phone) {
+  //     const candidate = await this.getUserByPhone(dto.phone);
+  //     if (candidate) {
+  //       throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.INVALID_DATA);
+  //     }
+  //     user.phone = dto.phone;
+  //   }
+  //
+  //   if (dto.password) {
+  //     user.password = await argon.hash(dto.password);
+  //   }
+  //
+  //   if (photo?.buffer) {
+  //     if (user.photoPath !== FILENAME.DEFAULT_IMG) {
+  //       this.fileService.deleteFile(user.photoPath);
+  //     }
+  //
+  //     user.photoPath = this.fileService.saveFile(photo);
+  //   }
+  //
+  //   const newUser = await this.userRepository.save(user);
+  //   const {password, refreshToken, ...userData} = newUser;
+  //   return userData;
+  // }
 
   async editRole(editDto: RoleUserDto, id: number, company: number) {
     const user = await this.userRepository.findOne({
@@ -129,7 +169,7 @@ export class UserService {
     });
 
     if (user.company.id !== company) {
-      throw new ForbiddenException(EXCEPTION_MESSAGE.FORBIDDEN_EXCEPTION.NO_RULES_TO_GET);
+      throw new ForbiddenException();
     }
 
     user.role = editDto.role;
@@ -137,14 +177,5 @@ export class UserService {
     const {password, refreshToken, ...userData} = savedUser;
 
     return userData;
-  }
-
-  async getAllUsers() {
-    return this.userRepository.find({
-      where: {},
-      relations: {
-        company: true
-      }
-    });
   }
 }

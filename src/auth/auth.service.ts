@@ -1,18 +1,23 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable} from '@nestjs/common';
 import { SignInDto, SignUpStuffDto, SignUpSuperManagerDto } from './dtos';
 import { User } from '../user/entities/user.entity';
 import { EntityManager } from 'typeorm';
 import { Company } from '../company/entities/company.entity';
 import { Role } from './enums';
 import { UserService } from '../user/user.service';
-import { COOKIE_EXPIRES, EXCEPTION_MESSAGE } from '../constants';
+import { COOKIE_EXPIRES } from '../constants';
 import * as argon from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { Tokens } from './types';
 import { CompanyService } from '../company/company.service';
 import { CryptService } from 'src/common/crypt/crypt.service';
-import { EXCEPTION } from './exceptions';
+import {
+  CompanyNotFoundException,
+  EXCEPTION,
+  InvalidSignupStringException, PasswordNotMatchedException, UnauthorizedException,
+  UserAlreadyExistsException
+} from './exceptions';
 
 // import { Confirm } from './entities/confirm.entity';
 
@@ -56,7 +61,7 @@ export class AuthService {
   async signupWithCompany(dto: SignUpSuperManagerDto) {
     const candidate = await this.userService.getUserByPhone(dto.phone);
     if (candidate) {
-      throw new BadRequestException(EXCEPTION.ALREADY_EXISTS);
+      throw new UserAlreadyExistsException();
     }
 
     const tokens = await this.getToken(dto.phone);
@@ -97,19 +102,19 @@ export class AuthService {
   async signupStuff(dto: SignUpStuffDto, signupString: string) {
     const candidate = await this.userService.getUserByPhone(dto.phone);
     if (candidate) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.ALREADY_EXISTS);
+      throw new UserAlreadyExistsException();
     }
 
     let data = null;
     try {
       data = CryptService.decryptRole(signupString);
     } catch (e) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND);
+      throw new InvalidSignupStringException()
     }
 
     const company = await this.companyService.getCompanyById(data?.id);
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND);
+      throw new CompanyNotFoundException();
     }
 
     const tokens = await this.getToken(dto.phone);
@@ -143,12 +148,12 @@ export class AuthService {
   async signin(dto: SignInDto) {
     const candidate = await this.userService.getUserByPhone(dto.phone);
     if (!candidate) {
-      throw new UnauthorizedException(EXCEPTION_MESSAGE.UNAUTHORIZED_EXCEPTION.INVALID_CREDENTIALS);
+      throw new UserAlreadyExistsException();
     }
 
     const passwordMatches = await argon.verify(candidate.password, dto.password);
     if (!passwordMatches) {
-      throw new UnauthorizedException(EXCEPTION_MESSAGE.UNAUTHORIZED_EXCEPTION.INVALID_CREDENTIALS);
+      throw new PasswordNotMatchedException();
     }
 
     const tokens = await this.getToken(candidate.phone);
@@ -166,7 +171,7 @@ export class AuthService {
 
   async logout(phone: string) {
     await this.userService.updateRefreshToken(phone, 'null');
-    return this.companyService.getCompanyById(1);
+    return true;
   }
 
   async refreshTokens(refreshToken: string) {
@@ -178,13 +183,13 @@ export class AuthService {
     }
 
     if (!refreshToken || isExpired) {
-      throw new UnauthorizedException(EXCEPTION_MESSAGE.UNAUTHORIZED_EXCEPTION.USER_IS_NOT_AUTHORIZED);
+      throw new UnauthorizedException()
     }
 
     const user = await this.userService.findByRefreshToken(refreshToken);
 
     if (!user) {
-      throw new UnauthorizedException(EXCEPTION_MESSAGE.UNAUTHORIZED_EXCEPTION.USER_IS_NOT_AUTHORIZED);
+      throw new UnauthorizedException();
     }
 
     const tokens = await this.getToken(user.phone);

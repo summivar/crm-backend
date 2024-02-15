@@ -6,6 +6,9 @@ import { Roles } from '../auth/decorators';
 import { Role } from '../auth/enums';
 import { CreateInfoTracerDto, EditInfoTracerDto } from './dtos';
 import { UserRequest } from '../auth/types';
+import { ApiException } from '@nanogiants/nestjs-swagger-api-exception-decorator';
+import { ForbiddenException, UnauthorizedException } from '../auth/exceptions';
+import { CompanyNotFoundException, InfoTracerAlreadyExistException, InfoTracerNotFoundException } from './exceptions';
 
 @ApiTags('Источник')
 @Controller('infoTracer')
@@ -16,6 +19,7 @@ export class InfoTracerController {
   }
 
   @ApiOperation({summary: 'Получение источника по ID'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException])
   @ApiParam({
     name: 'id',
     required: true,
@@ -34,6 +38,7 @@ export class InfoTracerController {
   }
 
   @ApiOperation({summary: 'Получение всех источников'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException])
   @ApiBearerAuth('JWT-auth')
   @Roles(Role.ADMIN, Role.MANAGER, Role.CLEANER, Role.DRIVER)
   @UseGuards(RolesGuard)
@@ -45,6 +50,7 @@ export class InfoTracerController {
   }
 
   @ApiOperation({summary: 'Создание источника'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException, CompanyNotFoundException, InfoTracerAlreadyExistException])
   @ApiBearerAuth('JWT-auth')
   @Roles(Role.ADMIN, Role.MANAGER)
   @UseGuards(RolesGuard)
@@ -57,6 +63,7 @@ export class InfoTracerController {
   }
 
   @ApiOperation({summary: 'Изменение источника'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException, CompanyNotFoundException, InfoTracerAlreadyExistException, InfoTracerNotFoundException])
   @ApiParam({
     name: 'id',
     required: true,
@@ -76,6 +83,7 @@ export class InfoTracerController {
   }
 
   @ApiOperation({summary: 'Удаление источника по ID'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException, CompanyNotFoundException, InfoTracerNotFoundException])
   @ApiParam({
     name: 'id',
     required: true,
@@ -94,6 +102,7 @@ export class InfoTracerController {
   }
 
   @ApiOperation({summary: 'Удаление всех источников'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException, CompanyNotFoundException])
   @ApiBearerAuth('JWT-auth')
   @Roles(Role.ADMIN, Role.MANAGER)
   @UseGuards(RolesGuard)

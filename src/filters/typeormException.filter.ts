@@ -14,26 +14,27 @@ export class QueryErrorFilter extends BaseExceptionFilter<
   HttpException | ExceptionType
 > {
   public catch(exception: ExceptionType, host: ArgumentsHost): void {
-    const {driverError = null, table = null, detail = null} = exception || {};
+    // const {driverError = null, table = null, detail = null} = exception || {};
+    //
+    // if (driverError && driverError.toString().includes('null value')) {
+    //   const column = driverError.toString().match(/column "(.*?)"/)[1];
+    //   const relation = driverError.toString().match(/relation "(.*?)"/)[1];
+    //   super.catch(
+    //     new BadRequestException(`${column} is required in ${relation}`),
+    //     host
+    //   );
+    // }
+    //
+    // if (detail && table && detail.includes('already exists')) {
+    //   const fieldName = detail.match(/Key \((.*?)\)=/)[1];
+    //   const fieldValue = detail.match(/\)=(.*?) /)[1].replace(/^\((.*)\)$/, '$1');
+    //   super.catch(
+    //     new BadRequestException(`Key '${fieldName}' must be unique. Value '${fieldValue}' is already exists in '${table}'`),
+    //     host,
+    //   );
+    // }
 
-    if (driverError && driverError.toString().includes('null value')) {
-      const column = driverError.toString().match(/column "(.*?)"/)[1];
-      const relation = driverError.toString().match(/relation "(.*?)"/)[1];
-      super.catch(
-        new BadRequestException(`${column} is required in ${relation}`),
-        host
-      );
-    }
-
-    if (detail && table && detail.includes('already exists')) {
-      const fieldName = detail.match(/Key \((.*?)\)=/)[1];
-      const fieldValue = detail.match(/\)=(.*?) /)[1].replace(/^\((.*)\)$/, '$1');
-      super.catch(
-        new BadRequestException(`Key '${fieldName}' must be unique. Value '${fieldValue}' is already exists in '${table}'`),
-        host,
-      );
-    }
-
-    super.catch(new BadRequestException(exception.toString()), host);
+    console.log('Error:', exception.toString())
+    super.catch(new BadRequestException('Ошибка с базой данных'), host);
   }
 }

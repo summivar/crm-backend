@@ -1,14 +1,23 @@
-import { Body, Controller, HttpStatus, Param, Post, Req, Res, UseGuards, } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
+import { Body, Controller, Param, Post, Req, Res, UseGuards, } from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { SignInDto, SignUpStuffDto, SignUpSuperManagerDto } from './dtos';
 import { COOKIE_EXPIRES, COOKIE_KEY } from '../constants';
 import { SignUpResponse, UserRequest } from './types';
 import { Request, Response } from 'express';
 import { JwtGuard } from './guards';
-import { ApiErrorDecorator } from '../common/decorator/error';
-import { EXCEPTION } from './exceptions';
-import { ErrorEnum } from '../exceptions';
+import {
+  CompanyNotFoundException,
+  InvalidSignupStringException, PasswordNotMatchedException, UnauthorizedException,
+  UserAlreadyExistsException,
+  UserNotFoundException
+} from './exceptions';
+import { ApiException } from '@nanogiants/nestjs-swagger-api-exception-decorator';
 
 @ApiTags('Авторизация')
 @Controller('auth')
@@ -17,8 +26,7 @@ export class AuthController {
   }
 
   @ApiOperation({summary: 'Регистрация пользователя и новой компании'})
-  @ApiErrorDecorator(EXCEPTION.ALREADY_EXISTS, ErrorEnum.BAD_REQUEST, HttpStatus.BAD_REQUEST)
-  @ApiErrorDecorator(EXCEPTION.ALREADY_EXISTS, ErrorEnum.BAD_REQUEST, HttpStatus.BAD_REQUEST)
+  @ApiException(() => [UserAlreadyExistsException])
   @Post('signup')
   async signup(
     @Body() signupDto: SignUpSuperManagerDto,
@@ -40,6 +48,7 @@ export class AuthController {
   }
 
   @ApiOperation({summary: 'Регистрация работника компании'})
+  @ApiException(() => [UserAlreadyExistsException, InvalidSignupStringException, CompanyNotFoundException])
   @ApiParam({
     name: 'companySignupString',
     required: true,
@@ -68,6 +77,7 @@ export class AuthController {
   }
 
   @ApiOperation({summary: 'Авторизация пользователя'})
+  @ApiException(() => [UserNotFoundException, PasswordNotMatchedException])
   @Post('signin')
   async signin(
     @Body() signinDto: SignInDto,
@@ -88,6 +98,7 @@ export class AuthController {
   }
 
   @ApiOperation({summary: 'Выход из аккаунта'})
+  @ApiException(() => [UnauthorizedException])
   @ApiBearerAuth('JWT-auth')
   @UseGuards(JwtGuard)
   @Post('logout')
@@ -100,6 +111,7 @@ export class AuthController {
   }
 
   @ApiOperation({summary: 'Проверка авторизации'})
+  @ApiException(() => [UnauthorizedException])
   @ApiBearerAuth('JWT-auth')
   @UseGuards(JwtGuard)
   @Post('getAuth')
@@ -114,10 +126,11 @@ export class AuthController {
       phone: req.user.phone,
       role: req.user.role,
       company: req.user.company,
-    }
+    };
   }
 
   @ApiOperation({summary: 'Обновление токенов'})
+  @ApiException(() => [UnauthorizedException])
   @Post('refresh')
   async refreshTokens(
     @Req() request: Request,
@@ -137,5 +150,4 @@ export class AuthController {
       user: response.user
     };
   }
-
 }

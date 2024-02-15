@@ -7,6 +7,7 @@ import { UserService } from '../../user/user.service';
 import { Payload } from '../types/payload.type';
 import { ConfigService } from '@nestjs/config';
 import { Role } from '../enums';
+import { EXCEPTION } from '../exceptions';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -33,12 +34,12 @@ export class RolesGuard implements CanActivate {
       bearer = authHeader.split(' ')[0];
       token = authHeader.split(' ')[1];
     } catch (e) {
-      throw new UnauthorizedException(EXCEPTION_MESSAGE.UNAUTHORIZED_EXCEPTION.USER_IS_NOT_AUTHORIZED);
+      throw new UnauthorizedException(EXCEPTION.USER_IS_NOT_AUTHORIZED);
     }
 
 
     if (bearer !== 'Bearer' || !token) {
-      throw new UnauthorizedException(EXCEPTION_MESSAGE.UNAUTHORIZED_EXCEPTION.USER_IS_NOT_AUTHORIZED);
+      throw new UnauthorizedException(EXCEPTION.USER_IS_NOT_AUTHORIZED);
     }
 
     if (!requiredRoles) {
@@ -50,14 +51,14 @@ export class RolesGuard implements CanActivate {
     try {
       payload = await this.jwtService.verifyAsync(token, {secret: this.configService.get<string>('accessSecret')});
     } catch (e) {
-      throw new UnauthorizedException(EXCEPTION_MESSAGE.UNAUTHORIZED_EXCEPTION.USER_IS_NOT_AUTHORIZED);
+      throw new UnauthorizedException(EXCEPTION.USER_IS_NOT_AUTHORIZED);
     }
 
 
     const user = await this.userService.getUserByPhone(payload.phone);
 
     if (!user) {
-      throw new UnauthorizedException(EXCEPTION_MESSAGE.UNAUTHORIZED_EXCEPTION.USER_IS_NOT_AUTHORIZED);
+      throw new UnauthorizedException(EXCEPTION.USER_IS_NOT_AUTHORIZED);
     }
 
     req.user = {
@@ -68,7 +69,7 @@ export class RolesGuard implements CanActivate {
     };
 
     if (!requiredRoles.includes(user.role)) {
-      throw new ForbiddenException(EXCEPTION_MESSAGE.FORBIDDEN_EXCEPTION.NO_RULES_TO_GET);
+      throw new ForbiddenException(EXCEPTION.NOT_RULES_FOR);
     }
 
     return true;

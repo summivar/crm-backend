@@ -5,6 +5,7 @@ import { Status } from './entities/status.entity';
 import { CreateStatusDto, EditStatusDto } from './dtos';
 import { CompanyService } from '../company/company.service';
 import { EXCEPTION_MESSAGE } from '../constants';
+import { CompanyNotFoundException, StatusAlreadyExistException, StatusNotFoundException } from './exceptions';
 
 @Injectable()
 export class StatusService {
@@ -36,12 +37,12 @@ export class StatusService {
   async create(dto: CreateStatusDto, companyId: number) {
     const company = await this.companyService.getCompanyWithEntity(companyId, 'status');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('company'));
+      throw new CompanyNotFoundException();
     }
 
     const existingStatus = company.statuses.find(status => status.name === dto.name);
     if (existingStatus) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.ALREADY_EXISTS);
+      throw new StatusAlreadyExistException();
     }
 
     const status = await this.statusRepository.save({
@@ -59,7 +60,7 @@ export class StatusService {
   async edit(dto: EditStatusDto, statusId: number, companyId: number) {
     const company = await this.companyService.getCompanyWithEntityId(companyId, statusId, 'status');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('company'));
+      throw new CompanyNotFoundException();
     }
 
     const status = await this.statusRepository.findOne({
@@ -68,10 +69,14 @@ export class StatusService {
       }
     });
 
+    if (!status) {
+      throw new StatusNotFoundException();
+    }
+
     if (dto.name) {
       const existingStatus = company.statuses.find(status => status.name === dto.name);
       if (existingStatus) {
-        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.ALREADY_EXISTS);
+        throw new StatusAlreadyExistException();
       }
 
       status.name = dto.name;
@@ -87,12 +92,12 @@ export class StatusService {
   async deleteById(companyId: number, statusId: number) {
     const company = await this.companyService.getCompanyWithEntityId(companyId, statusId, 'status');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND);
+      throw new CompanyNotFoundException();
     }
 
     const status = company.solutions.find(status => status.id === statusId);
     if (!status) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('status'));
+      throw new StatusNotFoundException();
     }
 
     await this.statusRepository.remove(status as any);
@@ -103,7 +108,7 @@ export class StatusService {
   async deleteAll(companyId: number) {
     const company = await this.companyService.getCompanyWithEntity(companyId, 'status');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND);
+      throw new CompanyNotFoundException();
     }
 
     company.statuses = [];

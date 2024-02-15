@@ -6,6 +6,9 @@ import { Role } from '../../auth/enums';
 import { RolesGuard } from '../../auth/guards';
 import { UserRequest } from '../../auth/types';
 import { CreateCorporateClientDto, EditCorporateClientDto, GetCorporateClientsFilterDto } from './dtos';
+import { ApiException } from '@nanogiants/nestjs-swagger-api-exception-decorator';
+import { ForbiddenException, UnauthorizedException } from '../../auth/exceptions';
+import { CompanyNotFoundException, CorporateClientNotFoundException, InfoTracerNotFoundException } from './exceptions';
 
 @ApiTags('Юридические клиенты')
 @Controller('corporate-client')
@@ -13,7 +16,8 @@ export class CorporateClientController {
   constructor(private corporateClientService: CorporateClientService) {
   }
 
-  @ApiOperation({ summary: 'Получение инд.клиентов по фильтрам' })
+  @ApiOperation({summary: 'Получение инд.клиентов по фильтрам'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException])
   @ApiBearerAuth('JWT-auth')
   @Roles(Role.ADMIN, Role.MANAGER)
   @UseGuards(RolesGuard)
@@ -26,6 +30,7 @@ export class CorporateClientController {
   }
 
   @ApiOperation({summary: 'Получение юр.клиента по ID'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException])
   @ApiParam({
     name: 'id',
     required: true,
@@ -44,8 +49,9 @@ export class CorporateClientController {
   }
 
   @ApiOperation({summary: 'Получение всех юр.клиентов'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException])
   @ApiBearerAuth('JWT-auth')
-  @Roles(Role.ADMIN, Role.MANAGER, Role.CLEANER, Role.DRIVER)
+  @Roles(Role.ADMIN, Role.MANAGER)
   @UseGuards(RolesGuard)
   @Get('getAll')
   async getAll(
@@ -55,6 +61,7 @@ export class CorporateClientController {
   }
 
   @ApiOperation({summary: 'Создание юр.клиента'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException, InfoTracerNotFoundException, CompanyNotFoundException])
   @ApiBearerAuth('JWT-auth')
   @Roles(Role.ADMIN, Role.MANAGER)
   @UseGuards(RolesGuard)
@@ -67,6 +74,7 @@ export class CorporateClientController {
   }
 
   @ApiOperation({summary: 'Изменение юр.клиента'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException, CorporateClientNotFoundException, InfoTracerNotFoundException, CompanyNotFoundException])
   @ApiParam({
     name: 'id',
     required: true,
@@ -86,6 +94,7 @@ export class CorporateClientController {
   }
 
   @ApiOperation({summary: 'Удаление юр.клиента по ID'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException, CompanyNotFoundException, CorporateClientNotFoundException])
   @ApiParam({
     name: 'id',
     required: true,
@@ -104,6 +113,7 @@ export class CorporateClientController {
   }
 
   @ApiOperation({summary: 'Удаление всех юр.клиентов'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException, CompanyNotFoundException])
   @ApiBearerAuth('JWT-auth')
   @Roles(Role.ADMIN, Role.MANAGER)
   @UseGuards(RolesGuard)

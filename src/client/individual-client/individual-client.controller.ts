@@ -6,6 +6,9 @@ import { Role } from '../../auth/enums';
 import { RolesGuard } from '../../auth/guards';
 import { UserRequest } from '../../auth/types';
 import { CreateIndividualClientDto, EditIndividualClientDto, GetIndividualClientsFilterDto } from './dtos';
+import { ApiException } from '@nanogiants/nestjs-swagger-api-exception-decorator';
+import { ForbiddenException, UnauthorizedException } from '../../auth/exceptions';
+import { CompanyNotFoundException, IndividualClientNotFoundException, InfoTracerNotFoundException } from './exceptions';
 
 @ApiTags('Индивидуальные клиенты')
 @Controller('individual-client')
@@ -14,6 +17,7 @@ export class IndividualClientController {
   }
 
   @ApiOperation({ summary: 'Получение инд.клиентов по фильтрам' })
+  @ApiException(() => [UnauthorizedException, ForbiddenException])
   @ApiBearerAuth('JWT-auth')
   @Roles(Role.ADMIN, Role.MANAGER)
   @UseGuards(RolesGuard)
@@ -26,6 +30,7 @@ export class IndividualClientController {
   }
 
   @ApiOperation({summary: 'Получение инд.клиента по ID'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException])
   @ApiParam({
     name: 'id',
     required: true,
@@ -44,6 +49,7 @@ export class IndividualClientController {
   }
 
   @ApiOperation({summary: 'Получение всех инд.клиентов'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException])
   @ApiBearerAuth('JWT-auth')
   @Roles(Role.ADMIN, Role.MANAGER, Role.CLEANER, Role.DRIVER)
   @UseGuards(RolesGuard)
@@ -55,6 +61,7 @@ export class IndividualClientController {
   }
 
   @ApiOperation({summary: 'Создание инд.клиента'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException, InfoTracerNotFoundException, CompanyNotFoundException])
   @ApiBearerAuth('JWT-auth')
   @Roles(Role.ADMIN, Role.MANAGER)
   @UseGuards(RolesGuard)
@@ -67,6 +74,7 @@ export class IndividualClientController {
   }
 
   @ApiOperation({summary: 'Изменение инд.клиента'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException, IndividualClientNotFoundException, InfoTracerNotFoundException, CompanyNotFoundException])
   @ApiParam({
     name: 'id',
     required: true,
@@ -86,6 +94,7 @@ export class IndividualClientController {
   }
 
   @ApiOperation({summary: 'Удаление инд.клиента по ID'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException, IndividualClientNotFoundException, CompanyNotFoundException])
   @ApiParam({
     name: 'id',
     required: true,
@@ -104,6 +113,7 @@ export class IndividualClientController {
   }
 
   @ApiOperation({summary: 'Удаление всех инд.клиентов'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException, CompanyNotFoundException])
   @ApiBearerAuth('JWT-auth')
   @Roles(Role.ADMIN, Role.MANAGER)
   @UseGuards(RolesGuard)

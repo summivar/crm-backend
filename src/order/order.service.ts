@@ -14,6 +14,16 @@ import { CorporateClientService } from '../client/corporate-client/corporate-cli
 import { IndividualClient } from '../client/individual-client/entity/individualClient.entity';
 import { CorporateClient } from '../client/corporate-client/entity/corporateClient.entity';
 import { GetOrderFilterDto } from './dtos/getOrderFilter.dto';
+import {
+  ClientNotFoundException,
+  CompanyNotFoundException, OrderNotFoundException,
+  PaymentMethodNotFoundException,
+  SolutionNotFoundException,
+  SolutionsNotFoundException,
+  StatusNotFoundException,
+  StuffNotFoundException, StuffsNotFoundException,
+  UserNotFoundException
+} from './exceptions';
 
 @Injectable()
 export class OrderService {
@@ -150,7 +160,7 @@ export class OrderService {
   async create(dto: CreateOrderDto, companyId: number, userId: number) {
     const company = await this.companyService.getCompanyById(companyId, false);
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('company'));
+      throw new CompanyNotFoundException();
     }
 
     const companyWithOrders = await this.companyService.getCompanyWithEntity(companyId, 'order');
@@ -165,46 +175,46 @@ export class OrderService {
     }
 
     if (!client) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('client'));
+      throw new ClientNotFoundException();
     }
 
     const user = await this.userService.getUserById(userId);
     if (!user) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('user'));
+      throw new UserNotFoundException();
     }
 
     const paymentMethod = await this.paymentMethodService.getById(dto.paymentMethodId, companyId);
     if (!paymentMethod) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('paymentMethod'));
+      throw new PaymentMethodNotFoundException();
     }
 
     const status = await this.statusService.getById(dto.statusId, companyId);
     if (!status) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('status'));
+      throw new StatusNotFoundException();
     }
 
     const solutions = await Promise.all(dto.solutionsIds.map(async (solutionId) => {
       const solution = await this.solutionService.getById(solutionId, companyId);
       if (!solution) {
-        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('solution'));
+        throw new SolutionNotFoundException();
       }
       return solution;
     }));
 
     if (!solutions.length) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('solution'));
+      throw new SolutionsNotFoundException();
     }
 
     const stuff = await Promise.all(dto.stuffIds.map(async (userId) => {
       const user = await this.userService.getUserById(userId);
       if (!user) {
-        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('user'));
+        throw new StuffNotFoundException();
       }
       return user;
     }));
 
     if (!stuff.length) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('stuff'));
+      throw new StuffsNotFoundException()
     }
 
     return this.orderRepository.save({
@@ -229,7 +239,7 @@ export class OrderService {
   async edit(dto: EditOrderDto, companyId: number, orderId: number) {
     const company = await this.companyService.getCompanyWithEntityId(companyId, orderId, 'order');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('company'));
+      throw new CompanyNotFoundException();
     }
 
     const order = await this.orderRepository.findOne({
@@ -239,7 +249,7 @@ export class OrderService {
     });
 
     if (!order) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('order'));
+      throw new OrderNotFoundException();
     }
 
     if (dto.clientType && dto.clientId) {
@@ -251,7 +261,7 @@ export class OrderService {
       }
 
       if (!client) {
-        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('client'));
+        throw new ClientNotFoundException();
       }
 
       if (dto.clientType === 'individualClient') {
@@ -283,7 +293,7 @@ export class OrderService {
     if (dto.paymentMethodId) {
       const paymentMethod = await this.paymentMethodService.getById(dto.paymentMethodId, companyId);
       if (!paymentMethod) {
-        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('paymentMethod'));
+        throw new PaymentMethodNotFoundException();
       }
 
       order.paymentMethod = paymentMethod;
@@ -292,7 +302,7 @@ export class OrderService {
     if (dto.statusId) {
       const status = await this.statusService.getById(dto.statusId, companyId);
       if (!status) {
-        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('status'));
+        throw new StatusNotFoundException();
       }
 
       order.status = status;
@@ -302,13 +312,13 @@ export class OrderService {
       const solutions = await Promise.all(dto.solutionsIds.map(async (solutionId) => {
         const solution = await this.solutionService.getById(solutionId, companyId);
         if (!solution) {
-          throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('solution'));
+          throw new SolutionNotFoundException()
         }
         return solution;
       }));
 
       if (!solutions.length) {
-        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('solution'));
+        throw new SolutionsNotFoundException();
       }
 
       order.solutions = solutions;
@@ -318,13 +328,13 @@ export class OrderService {
       const stuff = await Promise.all(dto.stuffIds.map(async (userId) => {
         const user = await this.userService.getUserById(userId);
         if (!user) {
-          throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('stuff'));
+          throw new StuffNotFoundException()
         }
         return user;
       }));
 
       if (!stuff.length) {
-        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('stuff'));
+        throw new StuffsNotFoundException()
       }
 
       order.stuff = stuff;
@@ -336,12 +346,12 @@ export class OrderService {
   async deleteById(companyId: number, orderId: number) {
     const company = await this.companyService.getCompanyWithEntityId(companyId, orderId, 'order');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND);
+      throw new CompanyNotFoundException();
     }
 
     const order = company.orders.find(order => order.id === orderId);
     if (!order) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('order'));
+      throw new OrderNotFoundException();
     }
 
     await this.orderRepository.remove(order as any);
@@ -352,7 +362,7 @@ export class OrderService {
   async deleteAll(companyId: number) {
     const company = await this.companyService.getCompanyWithEntity(companyId, 'order');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND);
+      throw new CompanyNotFoundException();
     }
 
     company.orders = [];

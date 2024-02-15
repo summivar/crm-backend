@@ -1,10 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { CreateInfoTracerDto, EditInfoTracerDto } from './dtos';
 import { CompanyService } from '../company/company.service';
-import { EXCEPTION_MESSAGE } from '../constants';
 import { InfoTracer } from './entities/infoTracer.entity';
+import { CompanyNotFoundException, InfoTracerAlreadyExistException, InfoTracerNotFoundException } from './exceptions';
 
 @Injectable()
 export class InfoTracerService {
@@ -39,12 +39,12 @@ export class InfoTracerService {
   async create(dto: CreateInfoTracerDto, companyId: number) {
     const company = await this.companyService.getCompanyWithEntity(companyId, 'infoTracer');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('company'));
+      throw new CompanyNotFoundException();
     }
 
     const existingInfoTracer = company.infoTracers.find(infoTracer => infoTracer.name === dto.name);
     if (existingInfoTracer) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.ALREADY_EXISTS);
+      throw new InfoTracerAlreadyExistException();
     }
 
     const infoTracer = await this.infoTracerRepository.save({
@@ -61,7 +61,7 @@ export class InfoTracerService {
   async edit(dto: EditInfoTracerDto, infoTracerId: number, companyId: number) {
     const company = await this.companyService.getCompanyWithEntityId(companyId, infoTracerId, 'infoTracer');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('company'));
+      throw new CompanyNotFoundException();
     }
 
     const infoTracer = await this.infoTracerRepository.findOne({
@@ -71,13 +71,13 @@ export class InfoTracerService {
     });
 
     if (!infoTracer) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('infoTracer'));
+      throw new InfoTracerNotFoundException();
     }
 
     if (dto.name) {
       const existingInfoTracer = company.infoTracers.find(infoTracer => infoTracer.name === dto.name);
       if (existingInfoTracer) {
-        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.ALREADY_EXISTS);
+        throw new InfoTracerAlreadyExistException();
       }
 
       infoTracer.name = dto.name;
@@ -89,12 +89,12 @@ export class InfoTracerService {
   async deleteById(companyId: number, infoTracerId: number) {
     const company = await this.companyService.getCompanyWithEntityId(companyId, infoTracerId, 'infoTracer');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND);
+      throw new CompanyNotFoundException();
     }
 
     const infoTracer = company.infoTracers.find(infoTracer => infoTracer.id === infoTracerId);
     if (!infoTracer) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND_BY_ID('infoTracer'));
+      throw new InfoTracerNotFoundException();
     }
 
     await this.infoTracerRepository.remove(infoTracer as any);
@@ -105,7 +105,7 @@ export class InfoTracerService {
   async deleteAll(companyId: number) {
     const company = await this.companyService.getCompanyWithEntity(companyId, 'infoTracer');
     if (!company) {
-      throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.NOT_FOUND);
+      throw new CompanyNotFoundException();
     }
 
     company.infoTracers = [];
@@ -115,7 +115,4 @@ export class InfoTracerService {
     return true;
   }
 
-  async deleteAllDev() {
-
-  }
 }

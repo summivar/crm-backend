@@ -6,6 +6,9 @@ import { Roles } from '../auth/decorators';
 import { Role } from '../auth/enums';
 import { CreateSolutionDto, EditSolutionDto, GetSolutionFilterDto } from './dtos';
 import { UserRequest } from '../auth/types';
+import { ApiException } from '@nanogiants/nestjs-swagger-api-exception-decorator';
+import { ForbiddenException, UnauthorizedException } from '../auth/exceptions';
+import { CompanyNotFoundException, SolutionAlreadyExistException, SolutionNotFoundException } from './exceptions';
 
 @ApiTags('Услуги')
 @Controller('solution')
@@ -16,6 +19,7 @@ export class SolutionController {
   }
 
   @ApiOperation({summary: 'Получение услуг по фильтрам'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException])
   @ApiBearerAuth('JWT-auth')
   @Roles(Role.ADMIN, Role.MANAGER)
   @UseGuards(RolesGuard)
@@ -28,6 +32,7 @@ export class SolutionController {
   }
 
   @ApiOperation({summary: 'Получение услуги по ID'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException])
   @ApiParam({
     name: 'id',
     required: true,
@@ -46,6 +51,7 @@ export class SolutionController {
   }
 
   @ApiOperation({summary: 'Получение всех услуг'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException])
   @ApiBearerAuth('JWT-auth')
   @Roles(Role.ADMIN, Role.MANAGER, Role.CLEANER, Role.DRIVER)
   @UseGuards(RolesGuard)
@@ -57,6 +63,7 @@ export class SolutionController {
   }
 
   @ApiOperation({summary: 'Создание услуги'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException, CompanyNotFoundException, SolutionAlreadyExistException])
   @ApiBearerAuth('JWT-auth')
   @Roles(Role.ADMIN, Role.MANAGER)
   @UseGuards(RolesGuard)
@@ -69,6 +76,7 @@ export class SolutionController {
   }
 
   @ApiOperation({summary: 'Изменение услуги'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException, CompanyNotFoundException, SolutionAlreadyExistException, SolutionNotFoundException])
   @ApiParam({
     name: 'id',
     required: true,
@@ -88,6 +96,7 @@ export class SolutionController {
   }
 
   @ApiOperation({summary: 'Удаление услуги по ID'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException, CompanyNotFoundException, SolutionNotFoundException])
   @ApiParam({
     name: 'id',
     required: true,
@@ -106,6 +115,7 @@ export class SolutionController {
   }
 
   @ApiOperation({summary: 'Удаление всех услуг'})
+  @ApiException(() => [UnauthorizedException, ForbiddenException, CompanyNotFoundException])
   @ApiBearerAuth('JWT-auth')
   @Roles(Role.ADMIN, Role.MANAGER)
   @UseGuards(RolesGuard)
