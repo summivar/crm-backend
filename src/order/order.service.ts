@@ -1,10 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Order } from './entities/order.entity';
 import { EntityManager, Repository } from 'typeorm';
 import { CompanyService } from '../company/company.service';
 import { CreateOrderDto, EditOrderDto } from './dtos';
-import { EXCEPTION_MESSAGE } from '../constants';
 import { UserService } from '../user/user.service';
 import { PaymentMethodService } from '../paymentMethod/paymentMethod.service';
 import { StatusService } from '../status/status.service';

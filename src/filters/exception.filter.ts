@@ -8,7 +8,6 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { ValidationException } from '../exceptions';
-import { EXCEPTION_MESSAGE } from '../constants';
 
 @Catch()
 export class CustomExceptionFilter implements ExceptionFilter {
@@ -46,7 +45,7 @@ export class CustomExceptionFilter implements ExceptionFilter {
         .includes('TypeError: Cannot convert undefined or null to object')
     ) {
       statusCode = 400;
-      errorMessage = EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.INVALID_DATA;
+      errorMessage = "Неверные данные в запросе"
       errorData = null;
     }
 

@@ -2,7 +2,6 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Company } from './entities/company.entity';
 import { Repository } from 'typeorm';
-import { EXCEPTION_MESSAGE } from '../constants';
 
 export type EntityType = 'order' | 'solution' | 'paymentMethod' | 'status' | 'infoTracer' | 'individualClient' | 'corporateClient';
 
@@ -67,8 +66,6 @@ export class CompanyService {
       case 'individualClient':
         relation = 'company.individualClients';
         break;
-      default:
-        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.INVALID_DATA);
     }
 
     return this.companyRepository
@@ -104,8 +101,6 @@ export class CompanyService {
       case 'individualClient':
         relation = 'company.individualClients';
         break;
-      default:
-        throw new BadRequestException(EXCEPTION_MESSAGE.BAD_REQUEST_EXCEPTION.INVALID_DATA);
     }
 
     return this.companyRepository

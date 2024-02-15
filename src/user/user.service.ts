@@ -1,20 +1,14 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
-import { EditUserDto, GetUserFilterDto, RoleUserDto } from './dtos';
-import { EXCEPTION_MESSAGE, FILENAME } from '../constants';
-import { FileSystemService } from '../common/file-system/file-system.service';
-import * as argon from 'argon2';
-import { Role } from '../auth/enums';
+import { GetUserFilterDto, RoleUserDto } from './dtos';
 import { ForbiddenException } from '../auth/exceptions';
-import { FromUserNotFoundException, UserNotFoundException } from './exceptions';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
-    private readonly fileService: FileSystemService,
   ) {
   }
 

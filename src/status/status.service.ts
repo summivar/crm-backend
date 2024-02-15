@@ -1,10 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { Status } from './entities/status.entity';
 import { CreateStatusDto, EditStatusDto } from './dtos';
 import { CompanyService } from '../company/company.service';
-import { EXCEPTION_MESSAGE } from '../constants';
 import { CompanyNotFoundException, StatusAlreadyExistException, StatusNotFoundException } from './exceptions';
 
 @Injectable()

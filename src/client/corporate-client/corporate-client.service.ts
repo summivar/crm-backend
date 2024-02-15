@@ -1,11 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { CreateCorporateClientDto, EditCorporateClientDto, GetCorporateClientsFilterDto } from './dtos';
 import { CorporateClient } from './entity/corporateClient.entity';
 import { CompanyService } from '../../company/company.service';
-import { EXCEPTION_MESSAGE } from '../../constants';
-import { EditPaymentMethodDto } from '../../paymentMethod/dtos';
 import { InfoTracerService } from '../../infoTracer/infoTracer.service';
 import {
   CompanyNotFoundException,

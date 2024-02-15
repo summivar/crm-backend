@@ -1,4 +1,3 @@
-export * from './exception.constants';
 export * from './path.constants';
 export * from './custom-uniqual-id.constants';
 export * from './file-limits.constants';

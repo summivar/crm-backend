@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { EXCEPTION_MESSAGE, PATH } from '../../constants';
+import { PATH } from '../../constants';
 import * as fs from 'fs';
 import { v4 as uuid } from 'uuid';
 import * as path from 'path';

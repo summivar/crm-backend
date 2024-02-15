@@ -2,11 +2,9 @@ import { CanActivate, ExecutionContext, ForbiddenException, Injectable, Unauthor
 import { JwtService } from '@nestjs/jwt';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators';
-import { EXCEPTION_MESSAGE } from '../../constants';
 import { UserService } from '../../user/user.service';
-import { Payload } from '../types/payload.type';
+import { Payload } from '../types';
 import { ConfigService } from '@nestjs/config';
-import { Role } from '../enums';
 import { EXCEPTION } from '../exceptions';
 
 @Injectable()

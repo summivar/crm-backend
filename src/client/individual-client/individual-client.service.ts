@@ -1,11 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { CreateIndividualClientDto, EditIndividualClientDto, GetIndividualClientsFilterDto } from './dtos';
 import { IndividualClient } from './entity/individualClient.entity';
 import { CompanyService } from '../../company/company.service';
 import { InfoTracerService } from '../../infoTracer/infoTracer.service';
-import { EXCEPTION_MESSAGE } from '../../constants';
 import {
   CompanyNotFoundException,
   IndividualClientAlreadyExistException, IndividualClientNotFoundException,
